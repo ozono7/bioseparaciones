@@ -1,0 +1,5 @@
+preparacion,soluto,peso_molecular_g_mol,concentracion_M,volumen_L,pureza
+"NaCl 1 M, 100 mL",NaCl,58.44,1.0,0.1,0.99
+"Acetato de sodio 10 mM, 250 mL",Acetato de sodio,82.03,0.01,0.25,0.99
+"Fosfato disodico 50 mM, 500 mL",Na2HPO4,141.96,0.05,0.5,0.99
+"Tris 100 mM, 100 mL",Tris,121.14,0.1,0.1,0.99

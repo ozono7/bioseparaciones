@@ -1,0 +1,22 @@
+tiempo_min,fase,absorbancia_280,conductividad_mS_cm
+0,Lavado con agua,0.019,0.1
+2,Lavado con agua,0.019,0.1
+4,Lavado con agua,0.021,0.1
+6,Carga de NiSO4,0.043,7.8
+8,Carga de NiSO4,0.052,8.2
+10,Lavado con agua,0.024,0.2
+12,Lavado con agua,0.021,0.2
+14,Lavado con agua,0.016,0.2
+16,Lavado con agua,0.018,0.2
+18,Lavado con agua,0.019,0.2
+20,Equilibrio pH 7.0,0.033,45.2
+22,Equilibrio pH 7.0,0.03,43.6
+24,Equilibrio pH 7.0,0.025,44.3
+26,Equilibrio pH 7.0,0.03,47.4
+28,Equilibrio pH 7.0,0.03,46.3
+30,HCl 0.1 M,0.038,28.9
+32,HCl 0.1 M,0.036,29.3
+34,HCl 0.1 M,0.049,29.3
+36,Lavado final con agua,0.022,0.5
+38,Lavado final con agua,0.022,0.5
+40,Lavado final con agua,0.02,0.5
