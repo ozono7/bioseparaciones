@@ -35,7 +35,7 @@ library(tidyverse)
 # Paso 6. Detener la bomba y sustituir la alimentacion por la solucion acida, hasta que la coloracion azul de la columna desaparezca.
 # Paso 7. Detener la bomba y alimentar agua hasta que el pH de la solucion de salida de la columna sea neutro.
 # Paso 8. Apagar el equipo y guardar el archivo del grafico obtenido en el software.
-# Nota: en esta practica todavia no se carga proteina: el registro que analiza este script es el de la preparacion de la columna (lavado, carga de niquel, equilibrio y lavado acido), con flujo de 0.5 mL/min durante 40 min y 20.0 mL acumulados.
+# En esta practica todavia no se carga proteina: el registro es el de la preparacion de la columna (lavado, carga de niquel, equilibrio y lavado acido), con flujo de 0.5 mL/min durante 40 min y 20.0 mL acumulados.
 # Seguridad y reglas (manual): seguir las indicaciones del instructor para instalar la columna y encender el equipo; verificar el pH de salida con papel pH; bata blanca obligatoria y guantes cuando se indique.
 
 # --------------------------------------------------------------------------

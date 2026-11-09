@@ -38,7 +38,7 @@ library(tidyverse)
 # Paso 18. Detener la bomba y el fraccionador y alimentar agua hasta que el pH de la solucion de salida de la columna sea neutro. No es necesario fraccionar mas tubos.
 # Paso 19. Analizar los tubos fraccionados midiendo la absorbancia a 280 nm (a excepcion de los tubos que contienen niquel) y mediante SDS-PAGE (sesion 2).
 # Sesion 2 (SDS-PAGE de las fracciones): el manual solo indica analizar las fracciones mediante SDS-PAGE en la sesion 2, sin detallar la preparacion de esas muestras. La indicacion para esa sesion es: calentar las muestras de las fracciones en microtubos 2 min antes de cargarlas, con buffer de carga 50/50 (50% muestra y 50% buffer de carga).
-# Nota: en este script las concentraciones por fraccion son las del CSV de ejemplo (medidas por Bradford); el manual indica analizar las fracciones por absorbancia a 280 nm (excepto los tubos con niquel) y por SDS-PAGE en la sesion 2.
+# Las concentraciones por fraccion del CSV se midieron por Bradford; el manual indica analizar las fracciones por absorbancia a 280 nm (excepto los tubos con niquel) y por SDS-PAGE en la sesion 2.
 # Seguridad y reglas (manual): no introducir burbujas al llenar el loop; verificar el pH de salida con papel pH; bata blanca obligatoria y guantes cuando se indique.
 
 # --------------------------------------------------------------------------

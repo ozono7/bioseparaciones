@@ -25,7 +25,7 @@ library(tidyverse)
 # --------------------------------------------------------------------------
 # Protocolo (Manual de Practicas, Practica 1. Soluciones y pH)
 # --------------------------------------------------------------------------
-# En esta estacion el trabajo es preparar soluciones, ajustar el pH y filtrar, con lo que se va a usar en las practicas que siguen. El manual no lista las soluciones con sus volumenes: las soluciones las indica el instructor (las soluciones para SDS-PAGE y el buffer de fosfatos). Por eso la tabla de preparaciones de este script es el ejemplo trabajado con los datos del CSV.
+# En esta estacion el trabajo es preparar soluciones, ajustar el pH y filtrar, con lo que se va a usar en las practicas que siguen. Las soluciones las indica el instructor (las soluciones para SDS-PAGE y el buffer de fosfatos).
 # Paso 1. Preparacion de soluciones: se repasan molaridad, normalidad, porcentaje en peso, porcentaje en volumen y pureza de los reactivos, y se hacen los calculos para preparar las soluciones indicadas por el instructor.
 # Paso 2. Ajuste de pH: se repasan los componentes y el funcionamiento del electrodo de pH, sus cuidados y su limpieza, la calibracion y el efecto de la temperatura. Cuando la molaridad debe ser precisa, el pH se ajusta con su acido o base conjugada; en los demas casos se ajusta con hidroxido de sodio o acido clorhidrico.
 # Paso 3. Filtracion: el instructor revisa los componentes y el funcionamiento del sistema de filtracion y las membranas que se usan para filtrar solventes para cromatografia. Se practican filtraciones de agua y de las soluciones preparadas.

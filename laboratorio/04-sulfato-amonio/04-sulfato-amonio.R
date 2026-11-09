@@ -31,7 +31,7 @@ library(tidyverse)
 # Paso 4. Repetir con el resto de los viales hasta alcanzar saturaciones de 60% (1.95 g), 73% (2.49 g) y 85% (3.03 g). Al terminar con el ultimo vial, dejar reposar los viales 5 min para que se complete la precipitacion.
 # Paso 5. Mezclar suavemente los viales y tomar 1.5 mL de suspension de cada uno en tubos de centrifuga. Centrifugar a 15000g por 5 min.
 # Paso 6. Separar el sobrenadante de cada tubo y cuantificar la concentracion de proteina con el metodo de Bradford. Diluir las muestras a analizar con agua, de manera que la concentracion maxima de sulfato de amonio sea 1 M; diluir aun mas si hace falta.
-# Paso 7. Con los datos obtenidos generar una tabla de solubilidad de albumina contra la concentracion molar de sulfato de amonio (eso es lo que calcula este script).
+# Paso 7. Con los datos obtenidos generar una tabla de solubilidad de albumina contra la concentracion molar de sulfato de amonio.
 # Paso 8. Agregar a los precipitados obtenidos 1 mL de agua y determinar visualmente si es posible disolver completamente a la albumina.
 # Seguridad y reglas (manual): agitar con suavidad, sin generar espuma; agregar los cristales poco a poco esperando a que se disuelvan; bata blanca obligatoria y guantes cuando se indique; limpiar la mesa antes y despues.
 
