@@ -13,7 +13,7 @@
 # Requiere los paquetes gganimate y gifski para guardar el GIF:
 # install.packages(c("gganimate", "gifski"))
 #
-# Datos: datos_imac.csv (concentracion de proteina por fraccion, medida por Bradford; carga 3 mL a 2 mg/mL = 6 mg).
+# Datos: datos_imac.csv (estandares de Bradford y fracciones con su absorbancia a 595 nm, su absorbancia a 280 nm y su factor de dilucion; carga 3 mL a 2 mg/mL = 6 mg).
 # ==========================================================================
 
 library(tidyverse)
@@ -76,6 +76,42 @@ volumen_fraccion_ml <- 0.5
 masa_cargada_mg <- 6.0
 
 datos <- read_csv("datos_imac.csv", show_col_types = FALSE)
+
+# Cada fraccion se mide por Bradford: la absorbancia a 595 nm es la medicion
+# y la concentracion sale de la curva de calibracion. El CSV trae los
+# estandares de Bradford (0, 2.5, 5, 10 y 20 ug/mL, por triplicado, los
+# mismos valores de la practica 3) y las fracciones con su absorbancia a
+# 595 nm, su absorbancia a 280 nm y su factor de dilucion. Ajustamos la
+# recta y el polinomio a los estandares y convertimos cada absorbancia en
+# concentracion con la recta.
+# Dilucion: las fracciones llegan hasta casi 1 mg/mL (unos 970 ug/mL) y la
+# curva de Bradford llega hasta 20 ug/mL, asi que cada fraccion se diluye
+# 1:100 para leerla dentro de la curva (la fraccion mas concentrada queda
+# en unos 9.7 ug/mL, a la mitad de la curva). La concentracion en la
+# fraccion es la concentracion diluida por el factor de dilucion.
+estandares <- filter(datos, tipo == "estandar")
+ajuste_lineal <- lm(absorbancia_595 ~ concentracion_ug_ml, data = estandares)
+ajuste_poli <- lm(absorbancia_595 ~ concentracion_ug_ml +
+                    I(concentracion_ug_ml^2), data = estandares)
+print(tibble(
+  modelo = c("Lineal", "Polinomial grado 2"),
+  r_cuadrado = c(summary(ajuste_lineal)$r.squared,
+                 summary(ajuste_poli)$r.squared)
+))
+
+muestras <- filter(datos, tipo == "muestra") %>%
+  mutate(
+    concentracion_diluida_ug_ml =
+      (absorbancia_595 - coef(ajuste_lineal)[["(Intercept)"]]) /
+      coef(ajuste_lineal)[["concentracion_ug_ml"]],
+    concentracion_proteina_mg_ml =
+      concentracion_diluida_ug_ml * factor_dilucion / 1000
+  )
+print(muestras %>%
+        select(fraccion, fase, absorbancia_595, absorbancia_280,
+               factor_dilucion, concentracion_proteina_mg_ml))
+
+datos <- muestras
 
 datos <- datos %>%
   mutate(masa_mg = concentracion_proteina_mg_ml * volumen_fraccion_ml)
