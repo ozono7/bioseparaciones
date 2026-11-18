@@ -136,4 +136,4 @@ ggsave("03_bradford.png", grafica,
 # --------------------------------------------------------------------------
 # - La curva de calibracion se construye cada vez que se cuantifica, con la misma proteina que se va a medir.
 # - La recta convierte la absorbancia de una muestra en concentracion; el polinomio muestra hasta donde la linealidad alcanza.
-# Terminamos la practica en el espectrofotometro: ya sabemos convertir una absorbancia en concentracion de proteina. Seguimos a la siguiente practica: el tanque de precipitacion con sulfato de amonio, donde se aplica la ecuacion de Cohn a la albumina.
+# Terminamos la practica en el espectrofotometro: ya sabemos convertir una absorbancia en concentracion de proteina. Seguimos a la siguiente practica: la precipitacion de albumina con sulfato de amonio, donde se aplica la ecuacion de Cohn a la albumina.

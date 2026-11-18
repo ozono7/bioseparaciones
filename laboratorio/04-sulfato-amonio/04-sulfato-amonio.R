@@ -9,7 +9,7 @@
 # Material academico para estudiantes
 # Serie "Bioseparaciones" - Laboratorio, Practica 4. Sulfato de amonio
 #
-# Descripcion: Practica 4 del laboratorio: el tanque de precipitacion con sulfato de amonio. Aqui se convierte a molaridad la masa de sulfato de amonio indicada en el manual para cada saturacion (49, 60, 73 y 85%, gramos por vial de 5 mL), y se ajusta la ecuacion de Cohn a la solubilidad de albumina medida en el sobrenadante por Bradford. Lo que se aprende aqui es la tabla de solubilidad contra molaridad que pide el manual, construida con los gramos del manual y la albumina medida.
+# Descripcion: Practica 4 del laboratorio: la precipitacion de albumina con sulfato de amonio en viales. Aqui se convierte a molaridad la masa de sulfato de amonio indicada en el manual para cada saturacion (49, 60, 73 y 85%, gramos por vial de 5 mL), y se ajusta la ecuacion de Cohn a la solubilidad de albumina medida en el sobrenadante por Bradford. Lo que se aprende aqui es la tabla de solubilidad contra molaridad que pide el manual, construida con los gramos del manual y la albumina medida.
 #
 # Objetivos de aprendizaje:
 #   - Convertir los gramos del manual a molaridad de sulfato de amonio.
@@ -17,7 +17,7 @@
 #   - Ajustar la ecuacion de Cohn a los datos de la practica.
 
 # Datos: datos_sulfato.csv (saturacion y gramos del manual, solubilidad en el sobrenadante medida por Bradford, 3 replicas).
-# Desarrollo: llegamos al tanque de precipitacion con los viales de albumina y el sulfato de amonio del manual. Primera parada: convertir los gramos del manual a molaridad. Segunda parada: ajustar la ecuacion de Cohn a la solubilidad medida en el sobrenadante. En cada parada calculamos y comentamos que significa el resultado antes de seguir.
+# Desarrollo: llegamos a la mesa con los viales de albumina y el sulfato de amonio del manual. Primera parada: convertir los gramos del manual a molaridad. Segunda parada: ajustar la ecuacion de Cohn a la solubilidad medida en el sobrenadante. En cada parada calculamos y comentamos que significa el resultado antes de seguir.
 # ==========================================================================
 
 library(tidyverse)
@@ -38,7 +38,7 @@ library(tidyverse)
 # --------------------------------------------------------------------------
 # Parada 1. Gramos del manual a molaridad
 # --------------------------------------------------------------------------
-# Estamos frente al tanque con los viales de 5 mL de albumina. Pesamos el sulfato de amonio que indica el manual para cada saturacion y lo convertimos a molaridad con su peso molecular de 132.14 g/mol y el volumen del vial.
+# Estamos en la mesa con los viales de 5 mL de albumina. Pesamos el sulfato de amonio que indica el manual para cada saturacion y lo convertimos a molaridad con su peso molecular de 132.14 g/mol y el volumen del vial.
 # Peso molecular del sulfato de amonio: 132.14 g/mol.
 # Cada vial tiene 5 mL de solucion de albumina (15 mg/mL en fosfato
 # 50 mM, pH 7, segun el manual).
@@ -60,7 +60,7 @@ print(resumen)
 # --------------------------------------------------------------------------
 # Parada 2. Ajuste de Cohn a la solubilidad en el sobrenadante
 # --------------------------------------------------------------------------
-# Seguimos en el tanque: ahora ajustamos la ecuacion de Cohn a la solubilidad que quedo en el sobrenadante, medida por Bradford. La fraccion soluble se calcula contra los 15 mg/mL iniciales.
+# Seguimos con los viales: ahora ajustamos la ecuacion de Cohn a la solubilidad que quedo en el sobrenadante, medida por Bradford. La fraccion soluble se calcula contra los 15 mg/mL iniciales.
 ajuste <- lm(log10(solubilidad_media) ~ molaridad_M, data = resumen)
 print(summary(ajuste))
 
@@ -102,7 +102,7 @@ print(grafica)
 # --------------------------------------------------------------------------
 # 4. Exportar la grafica
 # --------------------------------------------------------------------------
-# Antes de salir del tanque de precipitacion guardamos la grafica de la practica.
+# Antes de terminar la practica guardamos la grafica de la practica.
 ggsave("04_sulfato.png", grafica,
        width = 18, height = 12, units = "cm", dpi = 300)
 
@@ -118,4 +118,4 @@ ggsave("04_sulfato.png", grafica,
 # --------------------------------------------------------------------------
 # - Los gramos del manual se convierten a molaridad con el peso molecular y el volumen del vial.
 # - La tabla de solubilidad contra molaridad es el resultado que pide el manual para esta practica.
-# Terminamos la practica en el tanque de precipitacion: ya tenemos la tabla de solubilidad contra molaridad que pide el manual. Seguimos a la siguiente practica: la precipitacion con acetona, donde la temperatura decide cuanta proteina se recupera.
+# Terminamos la practica de precipitacion con sulfato de amonio: ya tenemos la tabla de solubilidad contra molaridad que pide el manual. Seguimos a la siguiente practica: la precipitacion con acetona, donde la temperatura decide cuanta proteina se recupera.
