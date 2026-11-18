@@ -210,7 +210,7 @@ ggsave("01_amortiguador.png", grafica,
 # Interpretacion
 # --------------------------------------------------------------------------
 # Grafica (pendiente de Nernst contra temperatura): el eje x es la temperatura en C y el eje y es la pendiente en mV/pH; cada punto trae su valor y la linea punteada es 25 C, la temperatura de trabajo.
-# - La pendiente sube con la temperatura: 58.17 mV/pH a 20 C, 59.16 mV/pH a 25 C y 60.15 mV/pH a 30 C. Esto significa que un pH-metro calibrado a una temperatura mide mal a otra, y por eso se calibra a la temperatura de trabajo.
+# - La pendiente sube con la temperatura: 58.17 mV/pH a 20 C, 59.17 mV/pH a 25 C y 60.16 mV/pH a 30 C. Esto significa que un pH-metro calibrado a una temperatura mide mal a otra, y por eso se calibra a la temperatura de trabajo.
 # Grafica (relacion base/acido contra pH): el eje x es el pH (adimensional) y el eje y es la relacion [base]/[acido] en escala log (adimensional); la zona sombreada es la zona amortiguadora (pKa +- 1) y el punto marcado es el pKa, donde la relacion es 1.
 # - La masa a pesar crece con la concentracion, el volumen y el peso molecular, y sube un poco al corregir por pureza. Esto significa que olvidar la pureza deja la solucion un poco diluida, y por eso lo siguiente en cada practica es pesar con la formula completa.
 # - En pH = pKa la relacion base/acido es 1; por debajo manda el acido y por encima manda la base. Esto significa que el pKa es el centro del amortiguador, y alrededor de el es donde el amortiguador resiste mejor los cambios de pH.
