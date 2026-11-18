@@ -7,6 +7,12 @@ valores son los mismos que calculan los scripts `.R` de cada práctica
 (misma curva de calibración de Bradford, mismos factores de dilución,
 mismas conversiones).
 
+Cada archivo `.tsv` tiene su archivo de pasos `.md` con el mismo nombre
+(por ejemplo, `P4-solubilidad.md` junto a `P4-solubilidad.tsv`), con
+los pasos completos de esa tabla: cómo crear la tabla en Prism, qué
+copiar y pegar, el análisis, el resultado esperado y qué revisar si no
+sale. Con ese archivo no hace falta abrir este README.
+
 ## Cómo copiar y pegar en Prism
 
 1. Abre el archivo `.tsv` (doble clic: se abre en Excel, LibreOffice o en
@@ -31,22 +37,22 @@ bien las celdas. Cambia el separador decimal a punto antes de pegar.
 
 ## Archivos
 
-| Archivo | Práctica | Tabla de Prism | Análisis en Prism |
-|---|---|---|---|
-| P1-amortiguador.tsv | P1 Soluciones y pH | XY | Regresión lineal |
-| P1-nernst.tsv | P1 Soluciones y pH | XY | Regresión lineal |
-| P2-calibracion-sds-page.tsv | P2 SDS-PAGE | XY | Regresión lineal + interpolar |
-| P3-bradford.tsv | P3 Bradford | XY, 3 subcolumnas | Regresión lineal (+ polinomio) |
-| P3-muestra-problema.tsv | P3 Bradford | (valores para interpolar) | Interpolar curva estándar |
-| P4-solubilidad.tsv | P4 Sulfato de amonio | XY, 3 subcolumnas | Transformar Y a log10 + regresión lineal |
-| P5-acetona.tsv | P5 Acetona | Grouped, 3 columnas x 3 subcolumnas | ANOVA de dos vías |
-| P6-fplc.tsv | P6 FPLC | XY, 2 conjuntos de datos | Gráfica con doble eje Y |
-| P7-imac-cromatograma.tsv | P7 IMAC | XY | Área bajo la curva |
-| P7-imac-a280-vs-bradford.tsv | P7 IMAC | XY | Regresión lineal |
-| P7-imac-gel.tsv | P7 IMAC sesión 2 | XY | Regresión lineal + interpolar |
-| P8-intercambio-cromatograma.tsv | P8 Intercambio iónico | XY | Área bajo la curva |
-| P8-intercambio-a280-vs-bradford.tsv | P8 Intercambio iónico | XY | Regresión lineal |
-| P8-intercambio-gel.tsv | P8 Intercambio iónico sesión 2 | XY | Regresión lineal + interpolar |
+| Archivo | Pasos | Práctica | Tabla de Prism | Análisis en Prism |
+|---|---|---|---|---|
+| P1-amortiguador.tsv | P1-amortiguador.md | P1 Soluciones y pH | XY | Regresión lineal |
+| P1-nernst.tsv | P1-nernst.md | P1 Soluciones y pH | XY | Regresión lineal |
+| P2-calibracion-sds-page.tsv | P2-calibracion-sds-page.md | P2 SDS-PAGE | XY | Regresión lineal + interpolar |
+| P3-bradford.tsv | P3-bradford.md | P3 Bradford | XY, 3 subcolumnas | Regresión lineal (+ polinomio) |
+| P3-muestra-problema.tsv | P3-muestra-problema.md | P3 Bradford | (valores para interpolar) | Interpolar curva estándar |
+| P4-solubilidad.tsv | P4-solubilidad.md | P4 Sulfato de amonio | XY, 3 subcolumnas | Transformar Y a log10 + regresión lineal |
+| P5-acetona.tsv | P5-acetona.md | P5 Acetona | Grouped, 3 columnas x 3 subcolumnas | ANOVA de dos vías |
+| P6-fplc.tsv | P6-fplc.md | P6 FPLC | XY, 2 conjuntos de datos | Gráfica con doble eje Y |
+| P7-imac-cromatograma.tsv | P7-imac-cromatograma.md | P7 IMAC | XY | Área bajo la curva |
+| P7-imac-a280-vs-bradford.tsv | P7-imac-a280-vs-bradford.md | P7 IMAC | XY | Regresión lineal |
+| P7-imac-gel.tsv | P7-imac-gel.md | P7 IMAC sesión 2 | XY | Regresión lineal + interpolar |
+| P8-intercambio-cromatograma.tsv | P8-intercambio-cromatograma.md | P8 Intercambio iónico | XY | Área bajo la curva |
+| P8-intercambio-a280-vs-bradford.tsv | P8-intercambio-a280-vs-bradford.md | P8 Intercambio iónico | XY | Regresión lineal |
+| P8-intercambio-gel.tsv | P8-intercambio-gel.md | P8 Intercambio iónico sesión 2 | XY | Regresión lineal + interpolar |
 
 ## P1. Soluciones y pH
 
