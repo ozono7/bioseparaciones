@@ -34,6 +34,7 @@ library(tidyverse)
 # Paso 7. Colocar la tapa segun los electrodos, conectar a la fuente de poder y correr el gel a 50 mA aproximadamente 1 h.
 # Paso 8. Desmontar el gel y colocarlo en un bano con la solucion de tincion (Coomassie) en agitacion suave; dejar toda la noche.
 # Paso 9. Destenir el gel con lavados con la solucion destenidora en agitacion suave.
+# Principio (manual): la acrilamida copolimeriza con la bisacrilamida en cadenas entrecruzadas y forma poros de tamano comparable al de las proteinas, que producen el efecto de tamizado molecular. El SDS desnaturaliza las proteinas y les da la misma carga negativa por unidad de longitud, asi que la migracion depende del peso molecular y no de la carga propia. El persulfato de amonio inicia la polimerizacion y el TEMED la cataliza. El beta-mercaptoetanol del buffer de carga reduce los puentes disulfuro para que la proteina quede como cadena lineal.
 # Nota del manual: la Tabla 2 del manual dice "Buffer Tris-base 8.8" para el gel concentrador, aunque en la lista de reactivos de la misma practica aparece el buffer Tris pH 6.8. Esa diferencia viene asi en el manual y conviene confirmarla con el instructor antes de preparar el gel.
 # Nota: se preparan 20 uL de muestra (15 uL de stock + 5 uL de buffer de carga) y se cargan 15 uL en el gel, como indica el manual.
 # Seguridad y residuos (manual): la acrilamida es neurotoxica; los residuos liquidos de acrilamida se almacenan debidamente etiquetados para entregarlos a companias de recoleccion y disposicion especializada, segun la programacion de la Subcomision de Seguridad e Higiene de la FCQ. Usar guantes y bata.
@@ -55,7 +56,30 @@ receta_gel_concentrador <- tibble(
 print(receta_gel_concentrador)
 
 # --------------------------------------------------------------------------
-# Parada 1. Rf de cada banda
+# Parada 1. Gel separador al 7.5% (pregunta post-laboratorio 1)
+# --------------------------------------------------------------------------
+# El manual pide calcular los volumenes para un gel separador al 7.5%.
+# Se escala la poliacrilamida con el porcentaje (la receta del 10% usa
+# 3.33 mL para 2 geles de 1 mm) y se mantienen el buffer, el SDS, el
+# TEMED y el persulfato; el agua completa el volumen total de 10 mL.
+receta_gel_7_5 <- tibble(
+  reactivo = c("Poliacrilamida", "Buffer Tris-base 8.8", "SDS 20%",
+               "Agua desionizada", "TEMED", "Persulfato de amonio"),
+  gel_7_5 = c(
+    3.33 * 7.5 / 10,
+    2.5,
+    0.05,
+    10 - (3.33 * 7.5 / 10 + 2.5 + 0.05 + 0.01 + 0.1),
+    0.01,
+    0.1
+  )
+) %>%
+  mutate(gel_7_5 = paste0(round(gel_7_5, 2), " mL"))
+
+print(receta_gel_7_5)
+
+# --------------------------------------------------------------------------
+# Parada 2. Rf de cada banda
 # --------------------------------------------------------------------------
 # Estamos frente al gel con la regla en la mano. Medimos la distancia recorrida por cada banda y la dividimos entre la distancia del frente, 65 mm: ese cociente es el Rf de cada banda.
 # Rf = distancia recorrida por la banda / distancia recorrida por el
@@ -70,7 +94,7 @@ datos <- datos %>%
 print(datos)
 
 # --------------------------------------------------------------------------
-# Parada 2. Recta de calibracion log10(PM) contra Rf
+# Parada 3. Recta de calibracion log10(PM) contra Rf
 # --------------------------------------------------------------------------
 # Seguimos en el gel: con las bandas del marcador ajustamos la recta de log10(PM) contra Rf. Esa recta es la regla que convierte migracion en peso molecular.
 marcador <- filter(datos, carril == "Marcador")
@@ -79,7 +103,7 @@ ajuste <- lm(log10(peso_molecular_kda) ~ rf, data = marcador)
 print(summary(ajuste))
 
 # --------------------------------------------------------------------------
-# Parada 3. Peso molecular estimado de la BSA
+# Parada 4. Peso molecular estimado de la BSA
 # --------------------------------------------------------------------------
 # Ahora aplicamos la recta a la banda de la BSA: con su Rf medido estimamos su peso molecular y lo comparamos con su valor de referencia.
 rf_bsa <- datos %>%
@@ -90,7 +114,7 @@ pm_bsa <- 10^predict(ajuste, newdata = tibble(rf = rf_bsa))
 print(tibble(rf_bsa = rf_bsa, peso_molecular_BSA_kda = pm_bsa))
 
 # --------------------------------------------------------------------------
-# Parada 4. Grafica: calibracion y BSA
+# Parada 5. Grafica: calibracion y BSA
 # --------------------------------------------------------------------------
 # Graficamos la calibracion: los puntos son las bandas del marcador, la linea es la recta ajustada y el punto rojo es la BSA.
 grafica <- ggplot(marcador, aes(x = rf, y = log10(peso_molecular_kda))) +
@@ -111,7 +135,7 @@ grafica <- ggplot(marcador, aes(x = rf, y = log10(peso_molecular_kda))) +
 print(grafica)
 
 # --------------------------------------------------------------------------
-# 5. Exportar la grafica
+# 6. Exportar la grafica
 # --------------------------------------------------------------------------
 # Antes de salir del equipo de electroforesis guardamos la grafica de la practica.
 ggsave("02_sds_page.png", grafica,

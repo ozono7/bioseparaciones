@@ -1,31 +1,31 @@
-fraccion,fase,concentracion_proteina_mg_ml
-1,Carga y lavado (Tris pH 8.0),0.041
-2,Carga y lavado (Tris pH 8.0),0.042
-3,Carga y lavado (Tris pH 8.0),0.04
-4,Carga y lavado (Tris pH 8.0),0.041
-5,Carga y lavado (Tris pH 8.0),0.037
-6,Carga y lavado (Tris pH 8.0),0.04
-7,Carga y lavado (Tris pH 8.0),0.039
-8,Carga y lavado (Tris pH 8.0),0.038
-9,Carga y lavado (Tris pH 8.0),0.039
-10,Carga y lavado (Tris pH 8.0),0.039
-11,Desorcion (NaCl 500 mM),0.104
-12,Desorcion (NaCl 500 mM),0.331
-13,Desorcion (NaCl 500 mM),0.701
-14,Desorcion (NaCl 500 mM),0.883
-15,Desorcion (NaCl 500 mM),0.74
-16,Desorcion (NaCl 500 mM),0.468
-17,Desorcion (NaCl 500 mM),0.204
-18,Desorcion (NaCl 500 mM),0.063
-19,Desorcion (NaCl 500 mM),0.06
-20,Desorcion (NaCl 500 mM),0.058
-21,Desorcion (NaCl 500 mM),0.059
-22,Desorcion (NaCl 500 mM),0.061
-23,Desorcion (NaCl 500 mM),0.06
-24,Desorcion (NaCl 500 mM),0.057
-25,Desorcion (NaCl 500 mM),0.06
-26,Desorcion (NaCl 500 mM),0.061
-27,Desorcion (NaCl 500 mM),0.066
-28,Desorcion (NaCl 500 mM),0.065
-29,Desorcion (NaCl 500 mM),0.058
-30,Desorcion (NaCl 500 mM),0.059
+fraccion,fase,concentracion_proteina_mg_ml,absorbancia_280
+1,Carga y lavado (Tris pH 8.0),0.041,0.028
+2,Carga y lavado (Tris pH 8.0),0.042,0.027
+3,Carga y lavado (Tris pH 8.0),0.04,0.027
+4,Carga y lavado (Tris pH 8.0),0.041,0.024
+5,Carga y lavado (Tris pH 8.0),0.037,0.021
+6,Carga y lavado (Tris pH 8.0),0.04,0.024
+7,Carga y lavado (Tris pH 8.0),0.039,0.027
+8,Carga y lavado (Tris pH 8.0),0.038,0.025
+9,Carga y lavado (Tris pH 8.0),0.039,0.025
+10,Carga y lavado (Tris pH 8.0),0.039,0.027
+11,Desorcion (NaCl 500 mM),0.104,0.069
+12,Desorcion (NaCl 500 mM),0.331,0.219
+13,Desorcion (NaCl 500 mM),0.701,0.470
+14,Desorcion (NaCl 500 mM),0.883,0.591
+15,Desorcion (NaCl 500 mM),0.74,0.492
+16,Desorcion (NaCl 500 mM),0.468,0.313
+17,Desorcion (NaCl 500 mM),0.204,0.136
+18,Desorcion (NaCl 500 mM),0.063,0.045
+19,Desorcion (NaCl 500 mM),0.06,0.042
+20,Desorcion (NaCl 500 mM),0.058,0.037
+21,Desorcion (NaCl 500 mM),0.059,0.043
+22,Desorcion (NaCl 500 mM),0.061,0.038
+23,Desorcion (NaCl 500 mM),0.06,0.039
+24,Desorcion (NaCl 500 mM),0.057,0.040
+25,Desorcion (NaCl 500 mM),0.06,0.037
+26,Desorcion (NaCl 500 mM),0.061,0.041
+27,Desorcion (NaCl 500 mM),0.066,0.040
+28,Desorcion (NaCl 500 mM),0.065,0.045
+29,Desorcion (NaCl 500 mM),0.058,0.041
+30,Desorcion (NaCl 500 mM),0.059,0.040

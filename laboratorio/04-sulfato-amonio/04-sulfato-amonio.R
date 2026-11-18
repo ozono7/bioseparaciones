@@ -33,6 +33,7 @@ library(tidyverse)
 # Paso 6. Separar el sobrenadante de cada tubo y cuantificar la concentracion de proteina con el metodo de Bradford. Diluir las muestras a analizar con agua, de manera que la concentracion maxima de sulfato de amonio sea 1 M; diluir aun mas si hace falta.
 # Paso 7. Con los datos obtenidos generar una tabla de solubilidad de albumina contra la concentracion molar de sulfato de amonio.
 # Paso 8. Agregar a los precipitados obtenidos 1 mL de agua y determinar visualmente si es posible disolver completamente a la albumina.
+# Principio (manual): al agregar sal la solubilidad de la proteina primero sube (salting-in) hasta un maximo y despues baja rapido (salting-out) hasta precipitar. El sulfato de amonio es la sal mas usada por su bajo costo; el anion mas efectivo para precipitar es el citrato y el cation mas efectivo es el amonio. La precipitacion con sales es barata, escalable, continua y usa equipo sencillo.
 # Seguridad y reglas (manual): agitar con suavidad, sin generar espuma; agregar los cristales poco a poco esperando a que se disuelvan; bata blanca obligatoria y guantes cuando se indique; limpiar la mesa antes y despues.
 
 # --------------------------------------------------------------------------
@@ -58,7 +59,29 @@ resumen <- datos %>%
 print(resumen)
 
 # --------------------------------------------------------------------------
-# Parada 2. Ajuste de Cohn a la solubilidad en el sobrenadante
+# Parada 2. Comprobacion de los gramos del manual (post-laboratorio 3)
+# --------------------------------------------------------------------------
+# El manual pide comprobar que el procedimiento de la pagina de referencia
+# para calcular el sulfato de amonio es correcto. La formula estandar de
+# saturacion (Scopes; la tabla citada en el manual) da los gramos por
+# litro para pasar de 0% a S% de saturacion a 25 C:
+#   g/L = 533 * S / (100 - 0.3 * S).
+# Para un vial de 5 mL se multiplica por 0.005 L y se compara con los
+# gramos del manual. La saturacion del 100% a 25 C es 761.4 g/L = 5.76 M.
+verificacion_gramos <- tibble(
+  saturacion_pct = c(49, 60, 73, 85),
+  gramos_manual = c(1.53, 1.95, 2.49, 3.03)
+) %>%
+  mutate(
+    gramos_por_litro = 533 * saturacion_pct / (100 - 0.3 * saturacion_pct),
+    gramos_calculados = gramos_por_litro * 0.005,
+    diferencia_g = gramos_calculados - gramos_manual
+  )
+
+print(verificacion_gramos)
+
+# --------------------------------------------------------------------------
+# Parada 3. Ajuste de Cohn a la solubilidad en el sobrenadante
 # --------------------------------------------------------------------------
 # Seguimos con los viales: ahora ajustamos la ecuacion de Cohn a la solubilidad que quedo en el sobrenadante, medida por Bradford. La fraccion soluble se calcula contra los 15 mg/mL iniciales.
 ajuste <- lm(log10(solubilidad_media) ~ molaridad_M, data = resumen)
@@ -77,7 +100,7 @@ resumen <- resumen %>%
 print(resumen)
 
 # --------------------------------------------------------------------------
-# Parada 3. Grafica: solubilidad en el sobrenadante contra molaridad
+# Parada 4. Grafica: solubilidad en el sobrenadante contra molaridad
 # --------------------------------------------------------------------------
 # Graficamos la albumina que queda soluble en el sobrenadante contra la molaridad de sal: cada punto es la media de tres replicas con su barra de desviacion.
 grafica <- ggplot(
@@ -100,7 +123,7 @@ grafica <- ggplot(
 print(grafica)
 
 # --------------------------------------------------------------------------
-# 4. Exportar la grafica
+# 5. Exportar la grafica
 # --------------------------------------------------------------------------
 # Antes de terminar la practica guardamos la grafica de la practica.
 ggsave("04_sulfato.png", grafica,

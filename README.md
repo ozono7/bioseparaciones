@@ -82,6 +82,11 @@ cromatogramas de IMAC y de intercambio iónico, y la curva de secado se
 dibujan cuadro por cuadro. Esas versiones necesitan `gganimate` y
 `gifski` (ver Instalación).
 
+Las prácticas 7 y 8 analizan las fracciones por absorbancia a 280 nm y
+por Bradford, y en la sesión 2 por SDS-PAGE (con su propio marcador y
+su estimación de peso molecular). La práctica 6 señala las partes del
+registro del FPLC con las líneas entre fases.
+
 Reglas de las lecciones:
 
 - Los datos van primero, como mediciones en CSV.
@@ -117,10 +122,10 @@ Reglas de las lecciones:
 | P2 | `laboratorio/02-sds-page/` | SDS-PAGE: peso molecular a partir de la migración |
 | P3 | `laboratorio/03-bradford/` | Ensayo de Bradford: curva de calibración |
 | P4 | `laboratorio/04-sulfato-amonio/` | Precipitación de albúmina con sulfato de amonio (ecuación de Cohn) |
-| P5 | `laboratorio/05-acetona/` | Precipitación de albúmina con acetona (efecto de la temperatura) |
-| P6 | `laboratorio/06-fplc/` | Introducción al FPLC (BioLogic LP) |
-| P7 | `laboratorio/07-imac/` | Cromatografía de afinidad por metal inmovilizado (IMAC) |
-| P8 | `laboratorio/08-intercambio-ionico/` | Cromatografía de intercambio iónico |
+| P5 | `laboratorio/05-acetona/` | Precipitación de albúmina con acetona (efecto de la temperatura, 2 sesiones) |
+| P6 | `laboratorio/06-fplc/` | Introducción al FPLC (BioLogic LP, 2 sesiones) |
+| P7 | `laboratorio/07-imac/` | Cromatografía de afinidad por metal inmovilizado (IMAC, 2 sesiones; sesión 2: SDS-PAGE de las fracciones) |
+| P8 | `laboratorio/08-intercambio-ionico/` | Cromatografía de intercambio iónico (2 sesiones; sesión 2: SDS-PAGE de las fracciones) |
 
 ## Próximas lecciones (planeadas)
 
@@ -132,14 +137,9 @@ Reglas de las lecciones:
 - Teoría 6: diseño de adsorbedores por lotes (estacionario y no estacionario); lecho fijo por platos teóricos y por transferencia de masa; lecho a contracorriente.
 - Teoría 7: cambios en el soluto por par iónico; diseño de extractor continuo; extracción diferencial.
 - Teoría 8: diseño de secadores adiabáticos y no adiabáticos.
-- P1: filtración convencional (ecuación de filtración) y calibración del pH-metro.
-- P2: gel separador al 7.5% (cálculo de volúmenes de reactivos).
 - P3: interferencias del ensayo de Bradford y ley de Beer-Lambert.
-- P4: redisolución de los precipitados y máxima solubilidad del sulfato de amonio.
 - P5: modelo de solubilidad contra constante dieléctrica del solvente.
 - P6: comparación HPLC contra FPLC y funcionamiento del colector de fracciones.
-- P7: análisis por SDS-PAGE de las fracciones de IMAC (segunda sesión).
-- P8: análisis por SDS-PAGE de las fracciones de intercambio iónico (segunda sesión).
 
 ## Bibliografía
 
@@ -148,8 +148,11 @@ Reglas de las lecciones:
 - Belter, P., Cussler, E. L., & Hu, W. (1988). *Bioseparations*. Wiley Interscience.
 
 Fuentes del curso: Manual de Prácticas del Laboratorio de Procesos de
-Bioseparación (FCQ-UASLP, agosto 2026) y Planeación Semestral de la
-asignatura (agosto–diciembre 2026).
+Bioseparación (FCQ-UASLP, agosto–diciembre 2026, actualizado noviembre
+de 2026) y Planeación Semestral de la asignatura (agosto–diciembre
+2026). El PDF del manual es el documento oficial del curso y no está en
+este repositorio; el repositorio lo cita como fuente y reproduce sus
+protocolos, tablas y análisis.
 
 ## Datos y normas por verificar
 
@@ -157,10 +160,11 @@ asignatura (agosto–diciembre 2026).
   2.49 y 3.03 g por 5 mL para 49, 60, 73 y 85% de saturación) son los
   indicados en el manual. Las molaridades de este repositorio se
   calculan directamente de esos gramos (2.32, 2.95, 3.77 y 4.59 M).
-  El porcentaje de saturación nominal depende de la temperatura y del
-  aumento de volumen al disolver la sal, por lo que la correspondencia
-  gramos–porcentaje debe comprobarse con la tabla de referencia citada
-  en el manual: http://www.encorbio.com/protocols/AM-SO4.htm
+  Los gramos se comprobaron contra la fórmula estándar de saturación
+  (g/L = 533 × S / (100 − 0.3 × S), la tabla citada en el manual):
+  1.53, 1.95 y 2.49 g coinciden exactos y el de 85% da 3.04 g contra
+  3.03 g del manual (diferencia de 0.01 g por redondeo). La saturación
+  del 100% a 25 °C es 761.4 g/L = 5.76 M según la misma fórmula.
 - **Práctica 3 (Bradford):** el manual indica en el texto el rango
   1.25–20 µg/mL y en su Tabla 1 los estándares 0, 2.5, 5, 10 y 20
   µg/mL. Este repositorio usa la Tabla 1 del manual.
@@ -177,11 +181,16 @@ asignatura (agosto–diciembre 2026).
   sin detallar la preparación de esas muestras. La indicación de
   calentarlas 2 min en microtubos y cargarlas con buffer de carga 50/50
   (50% muestra y 50% buffer) es la indicación del curso para esa sesión,
-  no un paso del manual.
-- **Práctica 7 (IMAC):** el manual indica analizar las fracciones por
-  absorbancia a 280 nm (excepto los tubos con níquel) y por SDS-PAGE en
-  la sesión 2; las concentraciones por fracción de este repositorio son
-  las mediciones de ejemplo del CSV (Bradford).
+  no un paso del manual. El análisis de la sesión 2 (calibración con el
+  marcador del gel y peso molecular estimado de las bandas) ya está en
+  los scripts de P7 y P8, con sus CSV de mediciones de ejemplo.
+- **Prácticas 7 y 8 (A280):** el manual indica analizar las fracciones por
+  absorbancia a 280 nm (en P7, excepto los tubos con níquel) y por
+  SDS-PAGE en la sesión 2; en P8, por A280, Bradford y SDS-PAGE. Los
+  CSV ya traen la absorbancia a 280 nm por fracción y los scripts
+  calculan la concentración por A280 (0.667 por mg/mL, paso de 1 cm)
+  y la comparan con Bradford. Los tubos de la tira ácida, que contienen
+  el níquel desprendido, no se miden por A280 y no están en la tabla.
 - **Albúmina (BSA):** peso molecular 66.5 kDa y punto isoeléctrico 4.7
   son los valores de referencia habituales para la albúmina de suero
   bovino (UniProt P02769): https://www.uniprot.org/uniprotkb/P02769/entry

@@ -36,6 +36,8 @@ library(tidyverse)
 # Paso 7. Detener la bomba y alimentar agua hasta que el pH de la solucion de salida de la columna sea neutro.
 # Paso 8. Apagar el equipo y guardar el archivo del grafico obtenido en el software.
 # En esta practica todavia no se carga proteina: el registro es el de la preparacion de la columna (lavado, carga de niquel, equilibrio y lavado acido), con flujo de 0.5 mL/min durante 40 min y 20.0 mL acumulados.
+# Sesiones (manual): la practica ocupa dos semanas (12-23 de octubre). Sesion 1: instalacion de la columna, encendido del equipo y corrida de preparacion. Sesion 2: lectura del registro, senalamiento de las partes del grafico y conclusiones.
+# El detector UV tiene filtros para 280 nm y 254 nm; en esta practica se usa 280 nm, donde absorben las proteinas por sus residuos aromaticos.
 # Seguridad y reglas (manual): seguir las indicaciones del instructor para instalar la columna y encender el equipo; verificar el pH de salida con papel pH; bata blanca obligatoria y guantes cuando se indique.
 
 # --------------------------------------------------------------------------
@@ -55,6 +57,24 @@ print(datos)
 # Volumen total pasado por la columna en el registro.
 print(tibble(volumen_total_ml = max(datos$volumen_ml)))
 
+# Limites entre fases (post-laboratorio 1: senalar las partes del grafico).
+# La fase "Lavado con agua" aparece dos veces, asi que los tramos se
+# separan por cambios consecutivos y no por el nombre de la fase. El
+# limite entre dos tramos es el punto medio entre el ultimo volumen de
+# un tramo y el primero del siguiente.
+datos <- datos %>%
+  mutate(tramo = cumsum(fase != lag(fase, default = first(fase))))
+
+limites_fase <- datos %>%
+  group_by(tramo, fase) %>%
+  summarise(inicio_ml = min(volumen_ml), fin_ml = max(volumen_ml),
+            .groups = "drop") %>%
+  arrange(inicio_ml) %>%
+  mutate(limite_ml = (fin_ml + lead(inicio_ml)) / 2) %>%
+  filter(!is.na(limite_ml))
+
+print(limites_fase)
+
 # Aqui resumimos la conductividad y la absorbancia medias por fase: ese resumen dice que solucion estaba pasando en cada tramo del registro.
 # Conductividad media por fase.
 print(datos %>%
@@ -71,6 +91,8 @@ grafica_uv <- ggplot(
   datos,
   aes(x = volumen_ml, y = absorbancia_280, color = fase)
 ) +
+  geom_vline(data = limites_fase, aes(xintercept = limite_ml),
+             linetype = "dashed", color = "grey40") +
   geom_line(linewidth = 1) +
   geom_point(size = 2) +
   labs(
@@ -92,6 +114,8 @@ grafica_cond <- ggplot(
   datos,
   aes(x = volumen_ml, y = conductividad_mS_cm, color = fase)
 ) +
+  geom_vline(data = limites_fase, aes(xintercept = limite_ml),
+             linetype = "dashed", color = "grey40") +
   geom_line(linewidth = 1) +
   geom_point(size = 2) +
   labs(
@@ -121,6 +145,7 @@ ggsave("06_fplc_conductividad.png", grafica_cond,
 # - La absorbancia a 280 nm se mantiene en la linea base: en esta practica todavia no se carga proteina. Esto significa que el detector UV no ve proteina durante la preparacion, y por eso lo siguiente, en la practica de IMAC, es cargar la albumina y ver su pico.
 # Grafica 2 (conductividad contra volumen): el eje x es el volumen acumulado en mL y el eje y es la conductividad en mS/cm.
 # - La conductividad marca cada cambio de solucion: sube con la llegada del niquel y del buffer de adsorcion con 500 mM NaCl, y cambia de nuevo con el acido. Esto significa que el detector de conductividad sigue a las sales del buffer, y con el se sabe en que fase del protocolo esta la columna en cada momento.
+# - Las lineas punteadas marcan los limites entre fases (2.5, 4.5, 9.5, 14.5 y 17.5 mL): a la izquierda de cada linea esta la solucion anterior y a la derecha la siguiente. Esto significa que cada tramo del registro corresponde a un paso del protocolo y se lee en orden.
 
 # --------------------------------------------------------------------------
 # Que aprendimos

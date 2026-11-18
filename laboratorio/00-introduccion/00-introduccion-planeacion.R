@@ -10,6 +10,8 @@
 # Serie "Bioseparaciones" - Laboratorio, Practica 0. Introduccion
 #
 # Descripcion: Practica 0 del laboratorio: la planeacion. Se presenta el plan del semestre antes de empezar cada practica. Se ordena la planeacion del laboratorio del manual: las 9 practicas con sus fechas y sesiones, y la ponderacion de la evaluacion. Se comprueba que los porcentajes suman 100 y se grafica el peso de cada componente. Lo que se aprende aqui es el mapa del laboratorio: que practicas vamos a ver, en que orden y como se evalua cada una.
+# Objetivo del curso (manual): reforzar las buenas practicas de laboratorio y aplicar la teoria a la purificacion de proteinas, con enfasis en el principio de cada procedimiento.
+# Competencias del curso (manual): A2, aplicar conceptos de quimica y bioquimica en problemas de ingenieria de bioprocesos; B1, conducirse con seguridad al realizar experimentos.
 #
 # Objetivos de aprendizaje:
 #   - Ordenar el calendario de practicas del manual.
@@ -26,6 +28,8 @@ library(tidyverse)
 # Reglas del laboratorio (Manual de Practicas)
 # --------------------------------------------------------------------------
 # Antes de empezar las practicas, las reglas de la casa: la teoria y el laboratorio se cursan simultaneamente; cada alumno presenta su manual en las practicas; bata blanca de laboratorio obligatoria, con cubrebocas y guantes cuando se indique; cuestionario pre-laboratorio entregado antes de cada practica; la practica inicia 10 min despues de la hora indicada; limpiar la mesa de trabajo antes y despues de la practica; no fumar ni consumir alimentos o bebidas en el laboratorio. El laboratorio se acredita con al menos 75% de las practicas aprobadas.
+# Reglamento (manual): si se reprueba la teoria pero se acredita el laboratorio, el resultado del laboratorio sigue valido; si no se acredita el laboratorio, se anula la calificacion de teoria y se cursan teoria y laboratorio de nuevo. Se requiere el 100% de asistencia a las sesiones practicas, incluyendo las sesiones de discusion. Cada practica lleva un reporte escrito con referencias, con preguntas de resultados y de conocimientos, y conclusiones.
+# Manejo de residuos (manual): los cultivos liquidos de bacterias se tratan con hipoclorito de sodio al 10% por al menos 12 h antes de desecharlos; los cultivos en medio solido se esterilizan en autoclave 30 min a 121 C. La acrilamida es neurotoxica: sus residuos liquidos se almacenan etiquetados para disposicion especializada.
 
 # --------------------------------------------------------------------------
 # Parada 1. Leer la planeacion y la evaluacion
@@ -43,6 +47,15 @@ print(tibble(suma_ponderacion = total))
 
 # Practicas de dos sesiones.
 print(filter(planeacion, sesiones == 2))
+
+# Desglose del reporte (manual): el reporte vale 40% y se divide en
+# cuestionario 5%, resultados 15% y conclusiones 20%. Lo comprobamos.
+reporte <- tibble(
+  parte = c("Cuestionario", "Resultados", "Conclusiones"),
+  porcentaje = c(5, 15, 20)
+)
+print(reporte)
+print(tibble(suma_reporte = sum(reporte$porcentaje)))
 
 # --------------------------------------------------------------------------
 # Parada 2. Grafica: peso de cada componente de la evaluacion
@@ -79,11 +92,12 @@ ggsave("00_evaluacion.png", grafica,
 # --------------------------------------------------------------------------
 # Grafica (peso de cada componente de la evaluacion): el eje x es el peso en la calificacion en % y el eje y es el componente de la evaluacion.
 # - La ponderacion suma 100: pre-laboratorio 20%, desarrollo 40% y reporte 40%. Esto significa que el trabajo en la mesa y el reporte pesan lo mismo y juntos hacen el 80%, y por eso lo siguiente en cada practica es trabajar ordenado y reportar con calculos y conclusiones.
-# - Tres practicas ocupan dos sesiones: acetona, FPLC e IMAC, y el intercambio ionico tambien se programa en dos semanas. Esto significa que esas practicas necesitan mas tiempo porque el procedimiento no cabe en una sola sesion, y por eso el calendario les da dos semanas.
+# - Cuatro practicas ocupan dos sesiones: acetona, FPLC, IMAC e intercambio ionico. Esto significa que esas practicas necesitan mas tiempo porque el procedimiento no cabe en una sola sesion, y por eso el calendario les da dos semanas.
 
 # --------------------------------------------------------------------------
 # Que aprendimos
 # --------------------------------------------------------------------------
 # - El laboratorio se acredita con al menos 75% de las practicas aprobadas y se cursa junto con la teoria.
 # - Cada practica pide cuestionario previo, reporte con calculos y conclusiones, y trabajo ordenado en la mesa.
+# - El reporte se divide en cuestionario 5%, resultados 15% y conclusiones 20%, y la asistencia a las sesiones es del 100%.
 # Terminamos la introduccion en la entrada del laboratorio: ya tenemos el mapa del laboratorio. Seguimos a la primera practica: la mesa de preparacion de soluciones y ajuste de pH.

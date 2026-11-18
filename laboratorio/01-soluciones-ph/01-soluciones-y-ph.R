@@ -29,6 +29,8 @@ library(tidyverse)
 # Paso 1. Preparacion de soluciones: se repasan molaridad, normalidad, porcentaje en peso, porcentaje en volumen y pureza de los reactivos, y se hacen los calculos para preparar las soluciones indicadas por el instructor.
 # Paso 2. Ajuste de pH: se repasan los componentes y el funcionamiento del electrodo de pH, sus cuidados y su limpieza, la calibracion y el efecto de la temperatura. Cuando la molaridad debe ser precisa, el pH se ajusta con su acido o base conjugada; en los demas casos se ajusta con hidroxido de sodio o acido clorhidrico.
 # Paso 3. Filtracion: el instructor revisa los componentes y el funcionamiento del sistema de filtracion y las membranas que se usan para filtrar solventes para cromatografia. Se practican filtraciones de agua y de las soluciones preparadas.
+# Ecuacion de filtracion convencional (pregunta pre-laboratorio del manual): t/V = (mu * alfa * c / (2 * A^2 * deltaP)) * V + (mu * Rm / (A * deltaP)). t es el tiempo de filtracion, V el volumen filtrado, mu la viscosidad del liquido, alfa la resistencia especifica de la torta, c la concentracion de solidos, A el area de filtracion, deltaP la caida de presion y Rm la resistencia del medio filtrante. La grafica de t/V contra V es una recta: su pendiente da la resistencia de la torta y su ordenada la resistencia del medio.
+# Preparacion de acetato de sodio 10 mM (pregunta pre-laboratorio del manual): la tabla de abajo ya trae ese ejemplo trabajado (acetato de sodio 10 mM, 250 mL); la masa sale de la formula de la Parada 1 y el pH se fija con su acido o base conjugada segun Henderson-Hasselbalch.
 # Seguridad y reglas (manual): bata blanca de laboratorio obligatoria; cubrebocas y guantes cuando se indique; cuestionario pre-laboratorio entregado antes de empezar; limpiar la mesa de trabajo antes y despues de la practica; no fumar ni consumir alimentos o bebidas en el laboratorio.
 
 # --------------------------------------------------------------------------
@@ -42,6 +44,19 @@ datos <- read_csv("datos_preparaciones.csv", show_col_types = FALSE)
 datos <- datos %>%
   mutate(masa_g = concentracion_M * volumen_L *
            peso_molecular_g_mol / pureza)
+
+# Normalidad y porcentaje en peso (manual: molaridad, normalidad,
+# porcentaje en peso y pureza). Normalidad N = molaridad * equivalentes
+# por mol: para estas preparaciones acido-base se intercambia un
+# equivalente por mol (NaCl, acetato de sodio, fosfato disodico como
+# HPO4 2- / H2PO4 - y Tris). Porcentaje en peso/volumen: gramos de
+# soluto por 100 mL de solucion.
+datos <- datos %>%
+  mutate(
+    equivalentes_por_mol = 1,
+    normalidad_N = concentracion_M * equivalentes_por_mol,
+    porcentaje_p_v = masa_g / (volumen_L * 1000) * 100
+  )
 
 print(datos)
 
@@ -87,7 +102,42 @@ grafica <- ggplot(
 print(grafica)
 
 # --------------------------------------------------------------------------
-# 4. Exportar la grafica
+# Parada 4. Efecto de la temperatura en la calibracion del pH-metro
+# --------------------------------------------------------------------------
+# El electrodo de pH sigue la ecuacion de Nernst: su pendiente es
+# 2.303 * R * T / F. Al subir la temperatura sube la pendiente, por eso
+# el manual pide revisar el efecto de la temperatura en la calibracion
+# y calibrar a la temperatura de trabajo. R = 8.314 J/mol/K,
+# F = 96485 C/mol, T en kelvin.
+pendiente_nernst <- tibble(
+  temperatura_C = c(20, 25, 30),
+  temperatura_K = temperatura_C + 273.15
+) %>%
+  mutate(pendiente_mV_pH = 2.303 * 8.314 * temperatura_K / 96485 * 1000)
+
+print(pendiente_nernst)
+
+grafica_pendiente <- ggplot(
+  pendiente_nernst,
+  aes(x = temperatura_C, y = pendiente_mV_pH)
+) +
+  geom_line(linewidth = 1) +
+  geom_point(size = 2.5) +
+  labs(
+    x = "Temperatura (C)",
+    y = "Pendiente de Nernst (mV/pH)",
+    title = "pH-metro: pendiente de Nernst contra temperatura"
+  ) +
+  theme_classic(base_size = 13) +
+  theme(plot.title = element_text(face = "bold"))
+
+print(grafica_pendiente)
+
+ggsave("01_pendiente_nernst.png", grafica_pendiente,
+       width = 18, height = 12, units = "cm", dpi = 300)
+
+# --------------------------------------------------------------------------
+# 5. Exportar la grafica
 # --------------------------------------------------------------------------
 # Antes de salir de la mesa de preparacion guardamos la grafica de la practica.
 ggsave("01_amortiguador.png", grafica,
@@ -96,6 +146,8 @@ ggsave("01_amortiguador.png", grafica,
 # --------------------------------------------------------------------------
 # Interpretacion
 # --------------------------------------------------------------------------
+# Grafica (pendiente de Nernst contra temperatura): el eje x es la temperatura en C y el eje y es la pendiente en mV/pH.
+# - La pendiente sube con la temperatura: 58.17 mV/pH a 20 C, 59.16 mV/pH a 25 C y 60.15 mV/pH a 30 C. Esto significa que un pH-metro calibrado a una temperatura mide mal a otra, y por eso se calibra a la temperatura de trabajo.
 # Grafica (relacion base/acido contra pH): el eje x es el pH (adimensional) y el eje y es la relacion [base]/[acido] en escala log (adimensional).
 # - La masa a pesar crece con la concentracion, el volumen y el peso molecular, y sube un poco al corregir por pureza. Esto significa que olvidar la pureza deja la solucion un poco diluida, y por eso lo siguiente en cada practica es pesar con la formula completa.
 # - En pH = pKa la relacion base/acido es 1; por debajo manda el acido y por encima manda la base. Esto significa que el pKa es el centro del amortiguador, y alrededor de el es donde el amortiguador resiste mejor los cambios de pH.
@@ -105,4 +157,5 @@ ggsave("01_amortiguador.png", grafica,
 # --------------------------------------------------------------------------
 # - La formula masa = M * V * PM / pureza resuelve cualquier preparacion de la practica.
 # - Henderson-Hasselbalch dice que proporcion de base y acido mezclar para un pH objetivo.
+# - Los errores sistematicos desvian siempre en el mismo sentido (por ejemplo, una balanza mal calibrada) y se corrigen calibrando; los errores al azar varian en cada medida y se reducen repitiendo y promediando.
 # Terminamos la practica en la mesa de preparacion: ya sabemos pesar cada reactivo y mezclar el amortiguador al pH pedido. Seguimos a la siguiente practica: el gel de SDS-PAGE, donde se mide el peso molecular de la proteina.

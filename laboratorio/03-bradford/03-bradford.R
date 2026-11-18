@@ -33,6 +33,9 @@ library(tidyverse)
 # Paso 5. Disponer las muestras con reactivo Bradford donde indique el instructor.
 # Nota del manual: el texto de la practica dice que los estandares cubren de 1.25 a 20 ug/mL, pero su Tabla 1 lista los estandares 0, 2.5, 5, 10 y 20 ug/mL (sin estandar de 1.25 ug/mL). Este repositorio usa la Tabla 1 del manual, como ya se indica en el README.
 # Seguridad (manual): revisar la hoja de datos de seguridad (MSDS) del acido fosforico y conocer sus riesgos de manejo y contacto con la piel. El colorante Coomassie G-250 tiene baja estabilidad en solucion y se precipita continuamente: por eso se filtra y se centrifuga antes de usarlo.
+# Albumina de suero bovino (pre-laboratorio 2 del manual): peso molecular 66.5 kDa y punto isoelectrico 4.7.
+# Base del ensayo (post-laboratorio 5 del manual): el Coomassie G-250 libre absorbe a 465 nm y al unirse a la proteina su maximo se desplaza a 595 nm; la lectura a 595 nm mide la forma unida a la proteina.
+# Interferencias (post-laboratorio 3 del manual): el ensayo es casi insensible a las sales, pero muchas sustancias interfieren, entre ellas los detergentes (SDS, Triton) y las bases fuertes; por eso la curva se construye con la misma proteina que se va a medir y con las muestras en el mismo medio.
 
 # Tabla 1 del manual: curva de calibracion. Volumen de muestra mas agua: 160 uL; reactivo Bradford: 40 uL en todos los casos.
 tabla_calibracion_manual <- tibble(
@@ -43,6 +46,18 @@ tabla_calibracion_manual <- tibble(
   BSA_ug_ml = c(0, 0, 0, 2.5, 2.5, 2.5, 5, 5, 5, 10, 10, 10, 20, 20, 20)
 )
 print(tabla_calibracion_manual)
+
+# Comprobacion de la Tabla 1: el estandar es de 0.1 mg/mL, es decir
+# 0.1 ug/uL. Los ug de BSA salen del volumen pipeteado y la concentracion
+# del volumen total de muestra mas agua (160 uL). La tabla del manual
+# queda verificada con el calculo.
+comprobacion_tabla <- tabla_calibracion_manual %>%
+  mutate(
+    BSA_ug_calculado = estandar_BSA_0_1_mg_ml_uL * 0.1,
+    BSA_ug_ml_calculado = BSA_ug_calculado / 0.160
+  )
+print(comprobacion_tabla %>%
+        select(BSA_ug, BSA_ug_calculado, BSA_ug_ml, BSA_ug_ml_calculado))
 
 # --------------------------------------------------------------------------
 # Parada 1. Leer los estandares y resumir por concentracion

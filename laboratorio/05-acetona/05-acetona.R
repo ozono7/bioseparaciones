@@ -35,6 +35,9 @@ library(tidyverse)
 # Paso 8. Secar el precipitado 5 min a temperatura ambiente invirtiendo los tubos sobre una toalla de papel, sin perturbar el precipitado.
 # Paso 9. Resuspender el precipitado de cada tubo en 200 uL de buffer de fosfato agitando suavemente. Cuantificar la concentracion de albumina en los 12 tubos (Bradford) y determinar el porcentaje de proteina recuperada en solucion para los tubos tratados con acetona. Centrifugar los tubos para separar la solucion del material que no se haya disuelto; diluir la muestra si hace falta.
 # Nota: el manual trabaja con 12 tubos en total (uno por condicion) y los 3 tubos sin acetona son los controles a 25 C; los porcentajes se resumen por temperatura y concentracion a partir de las 3 replicas del CSV.
+# Sesiones (manual): la practica ocupa dos semanas. Sesion 1: precipitacion, incubacion de 45 min, centrifugacion y secado del precipitado. Sesion 2: resuspension en buffer, cuantificacion por Bradford, porcentaje recuperado y grafica.
+# Controles: los 3 tubos sin acetona a 25 C son la referencia del 100% (sin precipitacion no hay perdida); el porcentaje recuperado se calcula contra la concentracion inicial de cada tubo.
+# Principio (manual): el solvente organico debe ser miscible con el agua (etanol y acetona son los mas comunes) y baja la constante dielectrica del medio, lo que reduce la solubilidad de la proteina y la precipita. Se trabaja en frio para reducir la desnaturalizacion por la interaccion con el solvente, de modo que la proteina precipitada se pueda redisolver en solvente acuoso.
 # Seguridad y reglas (manual): adicionar el solvente lentamente, en porciones de 200 uL; no perturbar el precipitado al retirar el sobrenadante ni al secar; bata blanca obligatoria y guantes cuando se indique.
 
 # --------------------------------------------------------------------------
