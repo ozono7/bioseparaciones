@@ -9,7 +9,7 @@
 # Material academico para estudiantes
 # Serie "Bioseparaciones" - Laboratorio, Practica 6. FPLC
 #
-# Descripcion: Recorrido por el laboratorio de la planta, estacion 6: el equipo FPLC (BioLogic LP). Aqui se reconstruye el registro del equipo durante la carga de niquel y el equilibrio de la columna: absorbancia a 280 nm y conductividad contra tiempo, con flujo de 0.5 mL/min. El volumen acumulado se calcula de cero como flujo por tiempo, y cada fase del protocolo se identifica en el registro. Lo que se aprende aqui es a leer el registro del equipo: que detector sigue a la proteina y cual sigue a las sales, y donde empieza cada fase.
+# Descripcion: Practica 6 del laboratorio: el equipo FPLC (BioLogic LP). Aqui se reconstruye el registro del equipo durante la carga de niquel y el equilibrio de la columna: absorbancia a 280 nm y conductividad contra tiempo, con flujo de 0.5 mL/min. El volumen acumulado se calcula de cero como flujo por tiempo, y cada fase del protocolo se identifica en el registro. Lo que se aprende aqui es a leer el registro del equipo: que detector sigue a la proteina y cual sigue a las sales, y donde empieza cada fase.
 #
 # Objetivos de aprendizaje:
 #   - Identificar cada fase del protocolo en el registro del FPLC.
@@ -17,7 +17,7 @@
 #   - Leer la conductividad como senal del cambio de buffer.
 
 # Datos: datos_fplc.csv (absorbancia a 280 nm y conductividad registradas contra tiempo; flujo 0.5 mL/min).
-# Recorrido: llegamos al equipo FPLC, con su modulo de mezclado, sus detectores y su colector de fracciones. Primera parada: el registro completo con el volumen acumulado calculado de cero. Segunda y tercera parada: las graficas de absorbancia y de conductividad contra volumen. En cada parada leemos el registro y comentamos que significa antes de seguir.
+# Desarrollo: llegamos al equipo FPLC, con su modulo de mezclado, sus detectores y su colector de fracciones. Primera parada: el registro completo con el volumen acumulado calculado de cero. Segunda y tercera parada: las graficas de absorbancia y de conductividad contra volumen. En cada parada leemos el registro y comentamos que significa antes de seguir.
 # ==========================================================================
 
 library(tidyverse)
@@ -108,7 +108,7 @@ print(grafica_cond)
 # --------------------------------------------------------------------------
 # 4. Exportar las graficas
 # --------------------------------------------------------------------------
-# Antes de salir del equipo FPLC guardamos las dos graficas del recorrido.
+# Antes de salir del equipo FPLC guardamos las dos graficas de la practica.
 ggsave("06_fplc_uv.png", grafica_uv,
        width = 20, height = 12, units = "cm", dpi = 300)
 ggsave("06_fplc_conductividad.png", grafica_cond,
@@ -127,4 +127,4 @@ ggsave("06_fplc_conductividad.png", grafica_cond,
 # --------------------------------------------------------------------------
 # - El detector UV sigue a la proteina y el de conductividad sigue a las sales del buffer.
 # - El volumen acumulado sale del flujo por el tiempo y permite ubicar cada fase en el cromatograma.
-# Terminamos el recorrido en el equipo FPLC: ya sabemos leer su registro y preparar la columna. Seguimos a la siguiente estacion del laboratorio: la columna de IMAC con niquel, donde la albumina se retiene y se desorbe.
+# Terminamos la practica en el equipo FPLC: ya sabemos leer su registro y preparar la columna. Seguimos a la siguiente practica: la columna de IMAC con niquel, donde la albumina se retiene y se desorbe.

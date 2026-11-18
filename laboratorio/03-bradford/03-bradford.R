@@ -9,7 +9,7 @@
 # Material academico para estudiantes
 # Serie "Bioseparaciones" - Laboratorio, Practica 3. Ensayo de Bradford
 #
-# Descripcion: Recorrido por el laboratorio de la planta, estacion 3: el espectrofotometro del ensayo de Bradford. Aqui se construye la curva de calibracion del ensayo de Bradford con los estandares del manual (BSA 0, 2.5, 5, 10 y 20 ug/mL, por triplicado, absorbancia a 595 nm). Se ajusta una recta y un polinomio de segundo orden, se comparan, y se cuantifica una muestra problema con la recta. Lo que se aprende aqui es como convertir una absorbancia medida en una concentracion de proteina, que es lo que se necesita en casi todas las estaciones que siguen.
+# Descripcion: Practica 3 del laboratorio: el espectrofotometro del ensayo de Bradford. Aqui se construye la curva de calibracion del ensayo de Bradford con los estandares del manual (BSA 0, 2.5, 5, 10 y 20 ug/mL, por triplicado, absorbancia a 595 nm). Se ajusta una recta y un polinomio de segundo orden, se comparan, y se cuantifica una muestra problema con la recta. Lo que se aprende aqui es como convertir una absorbancia medida en una concentracion de proteina, que es lo que se necesita en casi todas las practicas que siguen.
 #
 # Objetivos de aprendizaje:
 #   - Construir la curva de calibracion con estandares por triplicado.
@@ -17,7 +17,7 @@
 #   - Cuantificar una muestra problema a partir de su absorbancia.
 
 # Datos: datos_bradford.csv (estandares de BSA del manual, absorbancia a 595 nm) y datos_bradford_muestra.csv (muestra problema).
-# Recorrido: llegamos al espectrofotometro con los estandares de BSA ya preparados. Primera parada: resumir la absorbancia por concentracion. Segunda parada: comparar la recta con el polinomio. Tercera parada: cuantificar la muestra problema. En cada parada medimos, calculamos y comentamos que significa el resultado antes de seguir.
+# Desarrollo: llegamos al espectrofotometro con los estandares de BSA ya preparados. Primera parada: resumir la absorbancia por concentracion. Segunda parada: comparar la recta con el polinomio. Tercera parada: cuantificar la muestra problema. En cada parada medimos, calculamos y comentamos que significa el resultado antes de seguir.
 # ==========================================================================
 
 library(tidyverse)
@@ -120,7 +120,7 @@ print(grafica)
 # --------------------------------------------------------------------------
 # 5. Exportar la grafica
 # --------------------------------------------------------------------------
-# Antes de salir del espectrofotometro guardamos la grafica del recorrido.
+# Antes de salir del espectrofotometro guardamos la grafica de la practica.
 ggsave("03_bradford.png", grafica,
        width = 18, height = 12, units = "cm", dpi = 300)
 
@@ -128,7 +128,7 @@ ggsave("03_bradford.png", grafica,
 # Interpretacion
 # --------------------------------------------------------------------------
 # Grafica (curva de calibracion de BSA): el eje x es la concentracion de BSA en ug/mL y el eje y es la absorbancia a 595 nm (adimensional).
-# - La absorbancia sube con la concentracion de proteina en todo el intervalo de 0 a 20 ug/mL. Esto significa que el ensayo responde en todo el intervalo del manual, y por eso lo siguiente es usar la curva para cuantificar las muestras de las estaciones que siguen.
+# - La absorbancia sube con la concentracion de proteina en todo el intervalo de 0 a 20 ug/mL. Esto significa que el ensayo responde en todo el intervalo del manual, y por eso lo siguiente es usar la curva para cuantificar las muestras de las practicas que siguen.
 # - El polinomio de segundo orden ajusta un poco mejor que la recta, porque la respuesta del colorante no es perfectamente lineal. Esto significa que en los extremos del intervalo la recta se desvia un poco, y por eso conviene cuantificar dentro del intervalo donde la recta ajusta bien.
 
 # --------------------------------------------------------------------------
@@ -136,4 +136,4 @@ ggsave("03_bradford.png", grafica,
 # --------------------------------------------------------------------------
 # - La curva de calibracion se construye cada vez que se cuantifica, con la misma proteina que se va a medir.
 # - La recta convierte la absorbancia de una muestra en concentracion; el polinomio muestra hasta donde la linealidad alcanza.
-# Terminamos el recorrido en el espectrofotometro: ya sabemos convertir una absorbancia en concentracion de proteina. Seguimos a la siguiente estacion del laboratorio: el tanque de precipitacion con sulfato de amonio, donde se aplica la ecuacion de Cohn a la albumina.
+# Terminamos la practica en el espectrofotometro: ya sabemos convertir una absorbancia en concentracion de proteina. Seguimos a la siguiente practica: el tanque de precipitacion con sulfato de amonio, donde se aplica la ecuacion de Cohn a la albumina.

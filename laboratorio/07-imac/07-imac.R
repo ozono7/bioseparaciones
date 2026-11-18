@@ -9,7 +9,7 @@
 # Material academico para estudiantes
 # Serie "Bioseparaciones" - Laboratorio, Practica 7. IMAC
 #
-# Descripcion: Recorrido por el laboratorio de la planta, estacion 7: la columna de afinidad IMAC con niquel. Aqui se analiza el cromatograma de IMAC con niquel: albumina cargada en buffer de adsorcion (fosfato 20 mM, NaCl 500 mM, pH 7.0) y desorbida con buffer pH 4.0. Cada fraccion es de 1 min a 0.5 mL/min, asi que la masa por fraccion es concentracion por 0.5 mL; la suma da la masa recuperada y su porcentaje respecto a los 6 mg cargados. Lo que se aprende aqui dice cuanta proteina se recupera en la desorcion y en que fracciones sale.
+# Descripcion: Practica 7 del laboratorio: la columna de afinidad IMAC con niquel. Aqui se analiza el cromatograma de IMAC con niquel: albumina cargada en buffer de adsorcion (fosfato 20 mM, NaCl 500 mM, pH 7.0) y desorbida con buffer pH 4.0. Cada fraccion es de 1 min a 0.5 mL/min, asi que la masa por fraccion es concentracion por 0.5 mL; la suma da la masa recuperada y su porcentaje respecto a los 6 mg cargados. Lo que se aprende aqui dice cuanta proteina se recupera en la desorcion y en que fracciones sale.
 #
 # Objetivos de aprendizaje:
 #   - Identificar el pico de desorcion en el cromatograma.
@@ -17,7 +17,7 @@
 #   - Calcular el porcentaje de recuperacion respecto a lo cargado.
 
 # Datos: datos_imac.csv (concentracion de proteina por fraccion, medida por Bradford; carga 3 mL a 2 mg/mL = 6 mg).
-# Recorrido: llegamos a la columna de IMAC ya preparada en la estacion del FPLC. Primera parada: la masa de proteina en cada fraccion. Segunda parada: la masa recuperada en la desorcion y su porcentaje. Tercera parada: el cromatograma. En cada parada calculamos y comentamos que significa el resultado antes de seguir.
+# Desarrollo: llegamos a la columna de IMAC ya preparada en la practica del FPLC. Primera parada: la masa de proteina en cada fraccion. Segunda parada: la masa recuperada en la desorcion y su porcentaje. Tercera parada: el cromatograma. En cada parada calculamos y comentamos que significa el resultado antes de seguir.
 # ==========================================================================
 
 library(tidyverse)
@@ -99,7 +99,7 @@ print(grafica)
 # --------------------------------------------------------------------------
 # 4. Exportar la grafica
 # --------------------------------------------------------------------------
-# Antes de salir de la columna de IMAC guardamos la grafica del recorrido.
+# Antes de salir de la columna de IMAC guardamos la grafica de la practica.
 ggsave("07_imac.png", grafica,
        width = 18, height = 12, units = "cm", dpi = 300)
 
@@ -115,4 +115,4 @@ ggsave("07_imac.png", grafica,
 # --------------------------------------------------------------------------
 # - La histidina de la superficie se une al niquel a pH 7 y se protona a pH 4, lo que rompe la union y desorbe la proteina.
 # - La masa recuperada es la suma de concentracion por volumen en cada fraccion de la desorcion.
-# Terminamos el recorrido en la columna de IMAC: ya sabemos en que fracciones sale la albumina y cuanta se recupera. Seguimos a la ultima estacion del laboratorio: la columna de intercambio ionico, donde la carga de la albumina decide si se retiene.
+# Terminamos la practica en la columna de IMAC: ya sabemos en que fracciones sale la albumina y cuanta se recupera. Seguimos a la ultima practica: la columna de intercambio ionico, donde la carga de la albumina decide si se retiene.

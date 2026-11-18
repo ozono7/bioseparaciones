@@ -12,23 +12,61 @@ a la purificación de biomoléculas. El laboratorio refuerza las buenas
 prácticas y aplica la teoría a la purificación de proteínas, con énfasis en
 el principio de cada procedimiento.
 
-## El formato: un recorrido por la planta
+## El formato
 
-Cada lección es una parada de un recorrido por una planta industrial de
-bioseparación (y, en el laboratorio, una estación del laboratorio de la
-planta). En cada parada se comenta qué equipo o proceso estamos viendo,
-qué se mide ahí y por qué, se hace el análisis con los datos y se da su
-interpretación: qué significa el resultado y qué sigue. La teoría recorre
-la línea de proceso en orden — caracterización, precipitación,
-rompimiento celular, centrifugación, ultrafiltración, adsorción,
-extracción y secado — y el laboratorio recorre sus estaciones en el orden
-de las prácticas, de la planeación (P0) al intercambio iónico (P8).
+La teoría es un recorrido por una planta industrial de bioseparación:
+cada unidad es una parada de la línea de proceso, donde se comenta qué
+equipo o proceso estamos viendo, qué se mide ahí y por qué, se hace el
+análisis con los datos y se da su interpretación: qué significa el
+resultado y qué sigue. La teoría recorre la línea de proceso en orden —
+caracterización, precipitación, rompimiento celular, centrifugación,
+ultrafiltración, adsorción, extracción y secado.
+
+El laboratorio son prácticas de laboratorio (P0–P8), cada una con su
+protocolo completo del Manual de Prácticas y su análisis con los datos
+medidos. Las prácticas siguen el orden del laboratorio, de la planeación
+(P0) al intercambio iónico (P8).
 
 Cada lección de laboratorio incluye además el protocolo completo de la
 práctica tal como viene en el Manual de Prácticas (pasos, volúmenes,
-concentraciones, tiempos y condiciones), narrado paso a paso dentro del
-recorrido, antes del análisis de los datos. Las tablas de recetas y de
+concentraciones, tiempos y condiciones), narrado paso a paso dentro de la
+práctica, antes del análisis de los datos. Las tablas de recetas y de
 calibración del manual van como tablas de datos en el script.
+
+## Instalación
+
+Para correr las lecciones hay que tener R y un editor. Hay dos caminos:
+instalar en la computadora o usar R en la nube, sin instalar nada.
+
+### En la computadora: R + RStudio o Positron
+
+1. Instala R desde https://cran.r-project.org/ (elige el instalador para
+   Windows, macOS o Linux).
+2. Instala un editor para R, uno de los dos:
+   - RStudio Desktop (gratuito), desde https://posit.co/download/rstudio-desktop/
+   - Positron (gratuito), desde https://positron.posit.co/
+3. Abre RStudio o Positron e instala los paquetes que usan las lecciones:
+   `install.packages("tidyverse")`
+4. Descarga este repositorio (o clónalo con git), abre el editor en la
+   carpeta de la lección y ejecuta el script.
+
+Las versiones animadas (`*-animado.R`) necesitan además los paquetes
+`gganimate` y `gifski`:
+`install.packages(c("gganimate", "gifski"))`
+
+### En la nube, sin instalar nada
+
+- **Posit Cloud** (https://posit.cloud/): crea una cuenta gratuita, abre
+  un proyecto nuevo de RStudio, sube la carpeta de la lección (el script
+  `.R` y su archivo `.csv`) e instala `tidyverse` con
+  `install.packages("tidyverse")` la primera vez. Después ejecuta el
+  script como en RStudio.
+- **Google Colab con R** (https://colab.research.google.com/): crea un
+  cuaderno nuevo, cambia el tipo de entorno a R (Entorno de ejecución →
+  Cambiar tipo de entorno de ejecución → R), instala `tidyverse` con
+  `install.packages("tidyverse")` y sube el script y su CSV al panel de
+  archivos. Para correr el script, ejecuta `source("nombre-del-script.R")`
+  en una celda. Los paquetes se instalan en cada sesión nueva.
 
 ## Cómo usar este repositorio
 
@@ -38,12 +76,18 @@ como PNG a 300 dpi con `ggsave()`. Para correr una lección, abre R o
 RStudio en la carpeta de la lección y ejecuta el script. Los paquetes
 necesarios son los de `tidyverse`.
 
+Las prácticas 6, 7 y 8 y la unidad 8 de teoría tienen además una versión
+animada (`*-animado.R`) con `gganimate`: el cromatograma del FPLC, los
+cromatogramas de IMAC y de intercambio iónico, y la curva de secado se
+dibujan cuadro por cuadro. Esas versiones necesitan `gganimate` y
+`gifski` (ver Instalación).
+
 Reglas de las lecciones:
 
 - Los datos van primero, como mediciones en CSV.
 - Todo se calcula de cero a partir de los datos: nada está pre-cocinado.
-- Cada lección es una parada del recorrido: en cada paso se comenta qué se
-  está haciendo, se hace el análisis con los datos y se da su interpretación.
+- Cada lección avanza paso a paso: en cada paso se comenta qué se está
+  haciendo, se hace el análisis con los datos y se da su interpretación.
 - Cada lección de laboratorio lleva el protocolo completo del manual
   (pasos, volúmenes, concentraciones, tiempos y condiciones) antes del
   análisis de los datos.

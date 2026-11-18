@@ -9,7 +9,7 @@
 # Material academico para estudiantes
 # Serie "Bioseparaciones" - Laboratorio, Practica 2. SDS-PAGE
 #
-# Descripcion: Recorrido por el laboratorio de la planta, estacion 2: el equipo de electroforesis SDS-PAGE. Aqui se calcula el Rf de cada banda (distancia recorrida entre distancia del frente, 65 mm) y se ajusta log10(PM) contra Rf con el marcador de peso molecular. Con esa recta se estima el peso molecular de la albumina (BSA) a partir de su Rf medido. Lo que se aprende aqui dice como convertir una distancia medida en el gel en un peso molecular.
+# Descripcion: Practica 2 del laboratorio: el equipo de electroforesis SDS-PAGE. Aqui se calcula el Rf de cada banda (distancia recorrida entre distancia del frente, 65 mm) y se ajusta log10(PM) contra Rf con el marcador de peso molecular. Con esa recta se estima el peso molecular de la albumina (BSA) a partir de su Rf medido. Lo que se aprende aqui dice como convertir una distancia medida en el gel en un peso molecular.
 #
 # Objetivos de aprendizaje:
 #   - Calcular el Rf de cada banda del gel.
@@ -17,7 +17,7 @@
 #   - Estimar el peso molecular de la BSA desde su migracion.
 
 # Datos: datos_sds_page.csv (distancia migrada de cada banda del marcador y de la BSA; frente del gel 65 mm).
-# Recorrido: llegamos a la estacion de electroforesis, con el gel ya corrido y tenido. Primera parada: medir las bandas y calcular el Rf de cada una. Segunda parada: la recta de calibracion con el marcador y el peso molecular de la BSA. En cada parada medimos, calculamos y comentamos que significa el resultado antes de seguir.
+# Desarrollo: llegamos al equipo de electroforesis, con el gel ya corrido y tenido. Primera parada: medir las bandas y calcular el Rf de cada una. Segunda parada: la recta de calibracion con el marcador y el peso molecular de la BSA. En cada parada medimos, calculamos y comentamos que significa el resultado antes de seguir.
 # ==========================================================================
 
 library(tidyverse)
@@ -113,7 +113,7 @@ print(grafica)
 # --------------------------------------------------------------------------
 # 5. Exportar la grafica
 # --------------------------------------------------------------------------
-# Antes de salir de la estacion de electroforesis guardamos la grafica del recorrido.
+# Antes de salir del equipo de electroforesis guardamos la grafica de la practica.
 ggsave("02_sds_page.png", grafica,
        width = 18, height = 12, units = "cm", dpi = 300)
 
@@ -129,4 +129,4 @@ ggsave("02_sds_page.png", grafica,
 # --------------------------------------------------------------------------
 # - En SDS-PAGE la separacion es por peso molecular, porque el SDS da la misma carga por unidad de longitud.
 # - La recta log10(PM) contra Rf convierte una distancia medida en un peso molecular estimado.
-# Terminamos el recorrido en la estacion de electroforesis: ya sabemos leer el peso molecular de una banda en el gel. Seguimos a la siguiente estacion del laboratorio: el espectrofotometro del ensayo de Bradford, donde se cuantifica la proteina.
+# Terminamos la practica en el equipo de electroforesis: ya sabemos leer el peso molecular de una banda en el gel. Seguimos a la siguiente practica: el espectrofotometro del ensayo de Bradford, donde se cuantifica la proteina.

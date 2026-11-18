@@ -9,7 +9,7 @@
 # Material academico para estudiantes
 # Serie "Bioseparaciones" - Laboratorio, Practica 0. Introduccion
 #
-# Descripcion: Recorrido por la planta, punto de partida: la entrada del laboratorio, donde se presenta el plan del semestre antes de visitar cada estacion. Se ordena la planeacion del laboratorio del manual: las 9 practicas con sus fechas y sesiones, y la ponderacion de la evaluacion. Se comprueba que los porcentajes suman 100 y se grafica el peso de cada componente. Lo que se aprende aqui es el mapa del recorrido: que estaciones vamos a visitar, en que orden y como se evalua cada una.
+# Descripcion: Practica 0 del laboratorio: la planeacion. Se presenta el plan del semestre antes de empezar cada practica. Se ordena la planeacion del laboratorio del manual: las 9 practicas con sus fechas y sesiones, y la ponderacion de la evaluacion. Se comprueba que los porcentajes suman 100 y se grafica el peso de cada componente. Lo que se aprende aqui es el mapa del laboratorio: que practicas vamos a ver, en que orden y como se evalua cada una.
 #
 # Objetivos de aprendizaje:
 #   - Ordenar el calendario de practicas del manual.
@@ -17,7 +17,7 @@
 #   - Identificar que practicas ocupan dos sesiones.
 
 # Datos: datos_planeacion.csv (practicas, fechas y sesiones del manual) y datos_evaluacion.csv (ponderacion del laboratorio).
-# Recorrido: estamos en la entrada del laboratorio, antes de empezar. Aqui se presenta el mapa completo: las 9 practicas con sus fechas y sesiones, y la ponderacion de la evaluacion. Despues de esta introduccion, cada practica es una estacion del laboratorio de la planta.
+# Desarrollo: estamos en la entrada del laboratorio, antes de empezar. Aqui se presenta el mapa completo: las 9 practicas con sus fechas y sesiones, y la ponderacion de la evaluacion. Despues de esta introduccion, cada practica se hace en el laboratorio.
 # ==========================================================================
 
 library(tidyverse)
@@ -25,7 +25,7 @@ library(tidyverse)
 # --------------------------------------------------------------------------
 # Reglas del laboratorio (Manual de Practicas)
 # --------------------------------------------------------------------------
-# Antes de visitar las estaciones, las reglas de la casa: la teoria y el laboratorio se cursan simultaneamente; cada alumno presenta su manual en las practicas; bata blanca de laboratorio obligatoria, con cubrebocas y guantes cuando se indique; cuestionario pre-laboratorio entregado antes de cada practica; la practica inicia 10 min despues de la hora indicada; limpiar la mesa de trabajo antes y despues de la practica; no fumar ni consumir alimentos o bebidas en el laboratorio. El laboratorio se acredita con al menos 75% de las practicas aprobadas.
+# Antes de empezar las practicas, las reglas de la casa: la teoria y el laboratorio se cursan simultaneamente; cada alumno presenta su manual en las practicas; bata blanca de laboratorio obligatoria, con cubrebocas y guantes cuando se indique; cuestionario pre-laboratorio entregado antes de cada practica; la practica inicia 10 min despues de la hora indicada; limpiar la mesa de trabajo antes y despues de la practica; no fumar ni consumir alimentos o bebidas en el laboratorio. El laboratorio se acredita con al menos 75% de las practicas aprobadas.
 
 # --------------------------------------------------------------------------
 # Parada 1. Leer la planeacion y la evaluacion
@@ -70,7 +70,7 @@ print(grafica)
 # --------------------------------------------------------------------------
 # 3. Exportar la grafica
 # --------------------------------------------------------------------------
-# Antes de salir de la entrada guardamos la grafica del recorrido.
+# Antes de salir de la entrada guardamos la grafica de la practica.
 ggsave("00_evaluacion.png", grafica,
        width = 20, height = 12, units = "cm", dpi = 300)
 
@@ -78,12 +78,12 @@ ggsave("00_evaluacion.png", grafica,
 # Interpretacion
 # --------------------------------------------------------------------------
 # Grafica (peso de cada componente de la evaluacion): el eje x es el peso en la calificacion en % y el eje y es el componente de la evaluacion.
-# - La ponderacion suma 100: pre-laboratorio 20%, desarrollo 40% y reporte 40%. Esto significa que el trabajo en la mesa y el reporte pesan lo mismo y juntos hacen el 80%, y por eso lo siguiente en cada estacion es trabajar ordenado y reportar con calculos y conclusiones.
-# - Tres practicas ocupan dos sesiones: acetona, FPLC e IMAC, y el intercambio ionico tambien se programa en dos semanas. Esto significa que esas estaciones necesitan mas tiempo porque el procedimiento no cabe en una sola sesion, y por eso el calendario les da dos semanas.
+# - La ponderacion suma 100: pre-laboratorio 20%, desarrollo 40% y reporte 40%. Esto significa que el trabajo en la mesa y el reporte pesan lo mismo y juntos hacen el 80%, y por eso lo siguiente en cada practica es trabajar ordenado y reportar con calculos y conclusiones.
+# - Tres practicas ocupan dos sesiones: acetona, FPLC e IMAC, y el intercambio ionico tambien se programa en dos semanas. Esto significa que esas practicas necesitan mas tiempo porque el procedimiento no cabe en una sola sesion, y por eso el calendario les da dos semanas.
 
 # --------------------------------------------------------------------------
 # Que aprendimos
 # --------------------------------------------------------------------------
 # - El laboratorio se acredita con al menos 75% de las practicas aprobadas y se cursa junto con la teoria.
 # - Cada practica pide cuestionario previo, reporte con calculos y conclusiones, y trabajo ordenado en la mesa.
-# Terminamos la introduccion en la entrada del laboratorio: ya tenemos el mapa del recorrido. Seguimos a la primera estacion: la mesa de preparacion de soluciones y ajuste de pH.
+# Terminamos la introduccion en la entrada del laboratorio: ya tenemos el mapa del laboratorio. Seguimos a la primera practica: la mesa de preparacion de soluciones y ajuste de pH.

@@ -9,7 +9,7 @@
 # Material academico para estudiantes
 # Serie "Bioseparaciones" - Laboratorio, Practica 8. Intercambio ionico
 #
-# Descripcion: Recorrido por el laboratorio de la planta, estacion 8 y ultima del laboratorio: la columna de intercambio ionico. Aqui se analiza el cromatograma de intercambio ionico de albumina: a pH 8.0 la albumina esta por encima de su pI (4.7), asi que tiene carga negativa y se retiene en un intercambiador de aniones; la desorcion se hace subiendo la fuerza ionica con NaCl 500 mM. La masa por fraccion es concentracion por 0.5 mL y la suma da la recuperacion respecto a los 6 mg cargados. Lo que se aprende aqui cierra el laboratorio: el pH respecto al pI decide que intercambiador retiene a la proteina.
+# Descripcion: Practica 8 y ultima del laboratorio: la columna de intercambio ionico. Aqui se analiza el cromatograma de intercambio ionico de albumina: a pH 8.0 la albumina esta por encima de su pI (4.7), asi que tiene carga negativa y se retiene en un intercambiador de aniones; la desorcion se hace subiendo la fuerza ionica con NaCl 500 mM. La masa por fraccion es concentracion por 0.5 mL y la suma da la recuperacion respecto a los 6 mg cargados. Lo que se aprende aqui cierra el laboratorio: el pH respecto al pI decide que intercambiador retiene a la proteina.
 #
 # Objetivos de aprendizaje:
 #   - Predecir el signo de la carga de la albumina a pH 8.0 desde su pI.
@@ -17,7 +17,7 @@
 #   - Calcular la masa recuperada y su porcentaje respecto a lo cargado.
 
 # Datos: datos_intercambio.csv (concentracion de proteina por fraccion, medida por Bradford; carga 3 mL a 2 mg/mL = 6 mg).
-# Recorrido: llegamos a la ultima estacion del laboratorio, la columna de intercambio ionico, con la albumina caracterizada desde la primera parada de la teoria. Primera parada: la masa de proteina en cada fraccion. Segunda parada: la masa recuperada en la desorcion y su porcentaje. Tercera parada: el cromatograma. En cada parada calculamos y comentamos que significa el resultado, y aqui cerramos el recorrido por el laboratorio.
+# Desarrollo: llegamos a la ultima practica del laboratorio, la columna de intercambio ionico, con la albumina caracterizada desde la primera parada de la teoria. Primera parada: la masa de proteina en cada fraccion. Segunda parada: la masa recuperada en la desorcion y su porcentaje. Tercera parada: el cromatograma. En cada parada calculamos y comentamos que significa el resultado, y aqui cerramos el laboratorio.
 # ==========================================================================
 
 library(tidyverse)
@@ -100,7 +100,7 @@ print(grafica)
 # --------------------------------------------------------------------------
 # 4. Exportar la grafica
 # --------------------------------------------------------------------------
-# Antes de salir de la columna de intercambio ionico guardamos la grafica del recorrido.
+# Antes de salir de la columna de intercambio ionico guardamos la grafica de la practica.
 ggsave("08_intercambio.png", grafica,
        width = 18, height = 12, units = "cm", dpi = 300)
 
@@ -116,4 +116,4 @@ ggsave("08_intercambio.png", grafica,
 # --------------------------------------------------------------------------
 # - El pH respecto al pI decide el signo de la carga y por tanto que intercambiador retiene a la proteina.
 # - La sal compite por los sitios del intercambiador y desorbe la proteina; la masa recuperada sale de sumar las fracciones.
-# Terminamos el recorrido en la columna de intercambio ionico, ultima estacion del laboratorio: la albumina quedo retenida por su carga y salio con la sal. Aqui se cierra el recorrido completo por el laboratorio de la planta, desde la preparacion de soluciones hasta la cromatografia.
+# Terminamos la practica en la columna de intercambio ionico, ultima practica del laboratorio: la albumina quedo retenida por su carga y salio con la sal. Aqui se cierra el laboratorio, desde la preparacion de soluciones hasta la cromatografia.

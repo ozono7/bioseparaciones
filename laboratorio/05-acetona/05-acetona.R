@@ -9,7 +9,7 @@
 # Material academico para estudiantes
 # Serie "Bioseparaciones" - Laboratorio, Practica 5. Acetona
 #
-# Descripcion: Recorrido por el laboratorio de la planta, estacion 5: la mesa de precipitacion con acetona, con el solvente frio. Aqui se calcula el porcentaje de albumina recuperada en solucion despues de precipitar con acetona a -20, 4 y 25 C, para tres concentraciones iniciales (10, 20 y 30 ug/mL). Se compara la recuperacion entre temperaturas y se grafica el porcentaje recuperado contra la temperatura del solvente. Lo que se aprende aqui dice a que temperatura conviene precipitar con acetona para recuperar mas proteina.
+# Descripcion: Practica 5 del laboratorio: la mesa de precipitacion con acetona, con el solvente frio. Aqui se calcula el porcentaje de albumina recuperada en solucion despues de precipitar con acetona a -20, 4 y 25 C, para tres concentraciones iniciales (10, 20 y 30 ug/mL). Se compara la recuperacion entre temperaturas y se grafica el porcentaje recuperado contra la temperatura del solvente. Lo que se aprende aqui dice a que temperatura conviene precipitar con acetona para recuperar mas proteina.
 #
 # Objetivos de aprendizaje:
 #   - Calcular el porcentaje de proteina recuperada por condicion.
@@ -17,7 +17,7 @@
 #   - Relacionar la temperatura baja con menor desnaturalizacion.
 
 # Datos: datos_acetona.csv (porcentaje de albumina recuperada medido por Bradford, 3 replicas por temperatura y concentracion inicial).
-# Recorrido: llegamos a la mesa de precipitacion con acetona, con el congelador a -20 C al lado. Primera parada: resumir la recuperacion por temperatura y por concentracion inicial. Segunda parada: la grafica de recuperacion contra temperatura. En cada parada calculamos y comentamos que significa el resultado antes de seguir.
+# Desarrollo: llegamos a la mesa de precipitacion con acetona, con el congelador a -20 C al lado. Primera parada: resumir la recuperacion por temperatura y por concentracion inicial. Segunda parada: la grafica de recuperacion contra temperatura. En cada parada calculamos y comentamos que significa el resultado antes de seguir.
 # ==========================================================================
 
 library(tidyverse)
@@ -91,7 +91,7 @@ print(grafica)
 # --------------------------------------------------------------------------
 # 3. Exportar la grafica
 # --------------------------------------------------------------------------
-# Antes de salir de la mesa de precipitacion con acetona guardamos la grafica del recorrido.
+# Antes de salir de la mesa de precipitacion con acetona guardamos la grafica de la practica.
 ggsave("05_acetona.png", grafica,
        width = 18, height = 12, units = "cm", dpi = 300)
 
@@ -107,4 +107,4 @@ ggsave("05_acetona.png", grafica,
 # --------------------------------------------------------------------------
 # - El solvente organico precipita la proteina y el frio protege su estructura para redisolverla despues.
 # - El porcentaje recuperado se mide con Bradford antes y despues de la precipitacion.
-# Terminamos el recorrido en la mesa de precipitacion con acetona: ya sabemos que el frio da la mejor recuperacion. Seguimos a la siguiente estacion del laboratorio: el equipo FPLC, donde se prepara la columna para la cromatografia.
+# Terminamos la practica en la mesa de precipitacion con acetona: ya sabemos que el frio da la mejor recuperacion. Seguimos a la siguiente practica: el equipo FPLC, donde se prepara la columna para la cromatografia.
