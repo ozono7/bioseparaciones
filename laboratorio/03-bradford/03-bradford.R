@@ -23,6 +23,52 @@
 library(tidyverse)
 
 # --------------------------------------------------------------------------
+# Carpeta de trabajo: la del propio script
+# --------------------------------------------------------------------------
+# El script resuelve solo la carpeta donde esta guardado y la pone como
+# carpeta de trabajo, asi los archivos de datos se leen por su nombre y la
+# grafica se guarda en la misma carpeta, sin editar rutas.
+# Primero prueba la ruta del documento activo en RStudio o Positron, luego
+# la ruta del archivo al correr con Rscript o source(), y si nada de eso
+# da una ruta, se queda en la carpeta de trabajo actual.
+ruta_script <- NULL
+if (requireNamespace("rstudioapi", quietly = TRUE) &&
+    rstudioapi::isAvailable()) {
+  ruta_script <- tryCatch(
+    rstudioapi::getActiveDocumentContext()$path,
+    error = function(e) NULL
+  )
+}
+if (is.null(ruta_script) || !nzchar(ruta_script)) {
+  ruta_script <- tryCatch(sys.frame(1)$ofile, error = function(e) NULL)
+}
+# Con Rscript el archivo no deja marco en la pila, asi que su ruta viene
+# en los argumentos de la linea de comandos (--file=...).
+if (is.null(ruta_script) || !nzchar(ruta_script)) {
+  archivo <- grep("--file=", commandArgs(trailingOnly = FALSE), value = TRUE)
+  if (length(archivo) > 0) {
+    ruta_script <- sub("--file=", "", archivo[1])
+  }
+}
+if (!is.null(ruta_script) && nzchar(ruta_script)) {
+  setwd(dirname(normalizePath(ruta_script, mustWork = FALSE)))
+}
+
+# Estilo de graficas: tema claro y legible, paleta apta para daltonicos
+# (Okabe-Ito) y tamano de fuente base mayor, para que las graficas se
+# lean bien en el reporte y en la presentacion.
+paleta <- c("#0072B2", "#E69F00", "#009E73", "#CC79A7", "#56B4E9", "#D55E00")
+tema <- theme_bw(base_size = 14) +
+  theme(
+    plot.title = element_text(face = "bold", size = 15),
+    plot.subtitle = element_text(size = 12),
+    axis.title = element_text(face = "bold"),
+    legend.position = "bottom",
+    legend.title = element_text(face = "bold"),
+    panel.grid.minor = element_blank()
+  )
+
+# --------------------------------------------------------------------------
 # Protocolo (Manual de Practicas, Practica 3. Ensayo de Bradford)
 # --------------------------------------------------------------------------
 # Reactivo Bradford (manual): disolver 20 mg de Coomassie Brilliant Blue G-250 en 10 mL de etanol; una vez disuelto parcialmente el colorante, agregar 20 mL de acido fosforico al 85% (w/v) y agitar hasta disolverlo por completo; diluir a 200 mL con agua y almacenar por 3 meses a 4 C protegido de la luz. Antes de usarlo, centrifugar la solucion. El manual tambien pide usar la solucion de colorante a temperatura ambiente y filtrarla antes del ensayo, y trabajar en una placa de microtitulacion limpia.
@@ -112,23 +158,55 @@ print(muestra %>%
 # --------------------------------------------------------------------------
 # Parada 4. Grafica: curva de calibracion
 # --------------------------------------------------------------------------
-# Graficamos la curva de calibracion: cada punto es la absorbancia media de un estandar con su barra de desviacion, y la linea es la recta ajustada.
+# Graficamos la curva de calibracion: cada punto es la absorbancia media de un estandar con su barra de desviacion; la linea continua es la recta y la linea punteada es el polinomio de segundo orden, con sus ecuaciones y R2 en el texto. La muestra problema aparece marcada con un triangulo.
+ecuacion_lineal <- paste0(
+  "Recta: A595 = ", round(coef(ajuste_lineal)[["(Intercept)"]], 4),
+  " + ", round(coef(ajuste_lineal)[["concentracion_ug_ml"]], 5),
+  " * C,  R2 = ", round(summary(ajuste_lineal)$r.squared, 4)
+)
+ecuacion_poli <- paste0(
+  "Polinomio: A595 = ", round(coef(ajuste_poli)[["(Intercept)"]], 4),
+  " + ", round(coef(ajuste_poli)[["concentracion_ug_ml"]], 5),
+  " * C - ", round(-coef(ajuste_poli)[["I(concentracion_ug_ml^2)"]], 6),
+  " * C^2,  R2 = ", round(summary(ajuste_poli)$r.squared, 4)
+)
+muestra_punto <- muestra %>%
+  summarise(concentracion_media = mean(concentracion_ug_ml),
+            absorbancia_media = mean(absorbancia_595))
+curva <- tibble(concentracion_ug_ml = seq(0, 20, length.out = 100)) %>%
+  mutate(
+    lineal = predict(ajuste_lineal, newdata = .),
+    poli = predict(ajuste_poli, newdata = .)
+  )
 grafica <- ggplot(
   resumen,
   aes(x = concentracion_ug_ml, y = absorbancia_media)
 ) +
   geom_errorbar(aes(ymin = absorbancia_media - de,
                     ymax = absorbancia_media + de),
-                width = 0.5, linewidth = 0.6) +
-  geom_point(size = 2.5) +
-  geom_smooth(method = "lm", se = FALSE, linewidth = 1) +
+                width = 0.5, linewidth = 0.6, color = paleta[1]) +
+  geom_point(size = 3, color = paleta[1]) +
+  geom_line(data = curva, aes(x = concentracion_ug_ml, y = lineal),
+            color = paleta[1], linewidth = 1) +
+  geom_line(data = curva, aes(x = concentracion_ug_ml, y = poli),
+            color = paleta[6], linewidth = 1, linetype = "dashed") +
+  geom_point(data = muestra_punto,
+             aes(x = concentracion_media, y = absorbancia_media),
+             color = paleta[2], size = 4, shape = 17) +
+  annotate("text", x = 0.5, y = 0.60, label = ecuacion_lineal,
+           hjust = 0, size = 4.5) +
+  annotate("text", x = 0.5, y = 0.54, label = ecuacion_poli,
+           hjust = 0, size = 4.5) +
+  annotate("text", x = muestra_punto$concentracion_media, y = 0.30,
+           label = "Muestra problema", hjust = 0, size = 4.5,
+           color = paleta[2]) +
   labs(
     x = "Concentracion de BSA (ug/mL)",
     y = "Absorbancia a 595 nm",
-    title = "Bradford: curva de calibracion de BSA"
+    title = "Bradford: curva de calibracion de BSA",
+    subtitle = "Linea continua: recta; linea punteada: polinomio de segundo orden"
   ) +
-  theme_classic(base_size = 13) +
-  theme(plot.title = element_text(face = "bold"))
+  tema
 
 print(grafica)
 
@@ -142,7 +220,7 @@ ggsave("03_bradford.png", grafica,
 # --------------------------------------------------------------------------
 # Interpretacion
 # --------------------------------------------------------------------------
-# Grafica (curva de calibracion de BSA): el eje x es la concentracion de BSA en ug/mL y el eje y es la absorbancia a 595 nm (adimensional).
+# Grafica (curva de calibracion de BSA): el eje x es la concentracion de BSA en ug/mL y el eje y es la absorbancia a 595 nm (adimensional); la linea continua es la recta y la linea punteada es el polinomio, con sus ecuaciones y R2 en el texto, y el triangulo es la muestra problema.
 # - La absorbancia sube con la concentracion de proteina en todo el intervalo de 0 a 20 ug/mL. Esto significa que el ensayo responde en todo el intervalo del manual, y por eso lo siguiente es usar la curva para cuantificar las muestras de las practicas que siguen.
 # - El polinomio de segundo orden ajusta un poco mejor que la recta, porque la respuesta del colorante no es perfectamente lineal. Esto significa que en los extremos del intervalo la recta se desvia un poco, y por eso conviene cuantificar dentro del intervalo donde la recta ajusta bien.
 

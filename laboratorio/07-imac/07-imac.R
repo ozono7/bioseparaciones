@@ -9,18 +9,65 @@
 # Material academico para estudiantes
 # Serie "Bioseparaciones" - Laboratorio, Practica 7. IMAC
 #
-# Descripcion: Practica 7 del laboratorio: la columna de afinidad IMAC con niquel. Aqui se analiza el cromatograma de IMAC con niquel: albumina cargada en buffer de adsorcion (fosfato 20 mM, NaCl 500 mM, pH 7.0) y desorbida con buffer pH 4.0. Cada fraccion es de 1 min a 0.5 mL/min, asi que la masa por fraccion es concentracion por 0.5 mL; la suma da la masa recuperada y su porcentaje respecto a los 6 mg cargados. Lo que se aprende aqui dice cuanta proteina se recupera en la desorcion y en que fracciones sale.
+# Descripcion: Practica 7 del laboratorio: la columna de afinidad IMAC con niquel. Aqui se mide cada fraccion por Bradford: la absorbancia a 595 nm es la medicion y la concentracion sale de la curva de calibracion, con una dilucion 1:100 que deja la lectura dentro de la curva. Cada fraccion es de 1 min a 0.5 mL/min, asi que la masa por fraccion es concentracion por 0.5 mL; la suma da la masa recuperada y su porcentaje respecto a los 6 mg cargados. Lo que se aprende aqui dice cuanta proteina se recupera en la desorcion y en que fracciones sale.
 #
 # Objetivos de aprendizaje:
+#   - Convertir la absorbancia a 595 nm en concentracion con la curva de Bradford.
 #   - Identificar el pico de desorcion en el cromatograma.
 #   - Calcular la masa de proteina por fraccion y la masa total.
 #   - Calcular el porcentaje de recuperacion respecto a lo cargado.
 
-# Datos: datos_imac.csv (concentracion de proteina por fraccion, medida por Bradford; carga 3 mL a 2 mg/mL = 6 mg).
-# Desarrollo: llegamos a la columna de IMAC ya preparada en la practica del FPLC. Primera parada: la masa de proteina en cada fraccion. Segunda parada: la masa recuperada en la desorcion y su porcentaje. Tercera parada: el cromatograma. En cada parada calculamos y comentamos que significa el resultado antes de seguir.
+# Datos: datos_imac.csv (estandares de Bradford y fracciones con su absorbancia a 595 nm, su absorbancia a 280 nm y su factor de dilucion; carga 3 mL a 2 mg/mL = 6 mg).
+# Desarrollo: llegamos a la columna de IMAC ya preparada en la practica del FPLC. Primera parada: la curva de Bradford y la conversion de la absorbancia a concentracion. Segunda parada: la masa de proteina en cada fraccion. Tercera parada: la masa recuperada en la desorcion y su porcentaje. Cuarta parada: la A280 contra el Bradford. Quinta parada: el gel de la sesion 2. Sexta parada: el cromatograma. En cada parada calculamos y comentamos que significa el resultado antes de seguir.
 # ==========================================================================
 
 library(tidyverse)
+
+# --------------------------------------------------------------------------
+# Carpeta de trabajo: la del propio script
+# --------------------------------------------------------------------------
+# El script resuelve solo la carpeta donde esta guardado y la pone como
+# carpeta de trabajo, asi los archivos de datos se leen por su nombre y la
+# grafica se guarda en la misma carpeta, sin editar rutas.
+# Primero prueba la ruta del documento activo en RStudio o Positron, luego
+# la ruta del archivo al correr con Rscript o source(), y si nada de eso
+# da una ruta, se queda en la carpeta de trabajo actual.
+ruta_script <- NULL
+if (requireNamespace("rstudioapi", quietly = TRUE) &&
+    rstudioapi::isAvailable()) {
+  ruta_script <- tryCatch(
+    rstudioapi::getActiveDocumentContext()$path,
+    error = function(e) NULL
+  )
+}
+if (is.null(ruta_script) || !nzchar(ruta_script)) {
+  ruta_script <- tryCatch(sys.frame(1)$ofile, error = function(e) NULL)
+}
+# Con Rscript el archivo no deja marco en la pila, asi que su ruta viene
+# en los argumentos de la linea de comandos (--file=...).
+if (is.null(ruta_script) || !nzchar(ruta_script)) {
+  archivo <- grep("--file=", commandArgs(trailingOnly = FALSE), value = TRUE)
+  if (length(archivo) > 0) {
+    ruta_script <- sub("--file=", "", archivo[1])
+  }
+}
+if (!is.null(ruta_script) && nzchar(ruta_script)) {
+  setwd(dirname(normalizePath(ruta_script, mustWork = FALSE)))
+}
+
+# Estilo de graficas: tema claro y legible, paleta apta para daltonicos
+# (Okabe-Ito) y tamano de fuente base mayor, para que las graficas se
+# lean bien en el reporte y en la presentacion.
+paleta <- c("#0072B2", "#E69F00", "#009E73", "#CC79A7", "#56B4E9", "#D55E00")
+tema <- theme_bw(base_size = 14) +
+  theme(
+    plot.title = element_text(face = "bold", size = 15),
+    plot.subtitle = element_text(size = 12),
+    axis.title = element_text(face = "bold"),
+    legend.position = "bottom",
+    legend.title = element_text(face = "bold"),
+    panel.grid.minor = element_blank()
+  )
 
 # --------------------------------------------------------------------------
 # Protocolo (Manual de Practicas, Practica 7. IMAC; pasos 9 a 19 del manual)
@@ -43,7 +90,48 @@ library(tidyverse)
 # Seguridad y reglas (manual): no introducir burbujas al llenar el loop; verificar el pH de salida con papel pH; bata blanca obligatoria y guantes cuando se indique.
 
 # --------------------------------------------------------------------------
-# Parada 1. Leer las fracciones y calcular la masa por fraccion
+# Parada 1. Curva de Bradford y conversion de la absorbancia a concentracion
+# --------------------------------------------------------------------------
+# Cada fraccion se mide por Bradford: la absorbancia a 595 nm es la medicion
+# y la concentracion sale de la curva de calibracion. El CSV trae los
+# estandares de Bradford (0, 2.5, 5, 10 y 20 ug/mL, por triplicado, los
+# mismos valores de la practica 3) y las fracciones con su absorbancia a
+# 595 nm, su absorbancia a 280 nm y su factor de dilucion. Ajustamos la
+# recta y el polinomio a los estandares y convertimos cada absorbancia en
+# concentracion con la recta.
+# Dilucion: las fracciones llegan hasta casi 1 mg/mL (unos 970 ug/mL) y la
+# curva de Bradford llega hasta 20 ug/mL, asi que cada fraccion se diluye
+# 1:100 para leerla dentro de la curva (la fraccion mas concentrada queda
+# en unos 9.7 ug/mL, a la mitad de la curva). La concentracion en la
+# fraccion es la concentracion diluida por el factor de dilucion.
+datos <- read_csv("datos_imac.csv", show_col_types = FALSE)
+
+estandares <- filter(datos, tipo == "estandar")
+ajuste_lineal <- lm(absorbancia_595 ~ concentracion_ug_ml, data = estandares)
+ajuste_poli <- lm(absorbancia_595 ~ concentracion_ug_ml +
+                    I(concentracion_ug_ml^2), data = estandares)
+print(tibble(
+  modelo = c("Lineal", "Polinomial grado 2"),
+  r_cuadrado = c(summary(ajuste_lineal)$r.squared,
+                 summary(ajuste_poli)$r.squared)
+))
+
+muestras <- filter(datos, tipo == "muestra") %>%
+  mutate(
+    concentracion_diluida_ug_ml =
+      (absorbancia_595 - coef(ajuste_lineal)[["(Intercept)"]]) /
+      coef(ajuste_lineal)[["concentracion_ug_ml"]],
+    concentracion_proteina_mg_ml =
+      concentracion_diluida_ug_ml * factor_dilucion / 1000
+  )
+print(muestras %>%
+        select(fraccion, fase, absorbancia_595, absorbancia_280,
+               factor_dilucion, concentracion_proteina_mg_ml))
+
+datos <- muestras
+
+# --------------------------------------------------------------------------
+# Parada 2. Masa de proteina por fraccion
 # --------------------------------------------------------------------------
 # Estamos frente a la columna de IMAC con el colector de fracciones. Cada fraccion es de 1 min a 0.5 mL/min, asi que la masa por fraccion es la concentracion medida por Bradford por 0.5 mL.
 # Fraccion de 1 min a 0.5 mL/min = 0.5 mL por fraccion.
@@ -52,15 +140,13 @@ library(tidyverse)
 volumen_fraccion_ml <- 0.5
 masa_cargada_mg <- 6.0
 
-datos <- read_csv("datos_imac.csv", show_col_types = FALSE)
-
 datos <- datos %>%
   mutate(masa_mg = concentracion_proteina_mg_ml * volumen_fraccion_ml)
 
 print(datos)
 
 # --------------------------------------------------------------------------
-# Parada 2. Masa recuperada en la desorcion y porcentaje de recuperacion
+# Parada 3. Masa recuperada en la desorcion y porcentaje de recuperacion
 # --------------------------------------------------------------------------
 # Seguimos en la columna: sumamos la masa por fase y calculamos la masa recuperada en la desorcion y su porcentaje respecto a los 6 mg cargados.
 resumen <- datos %>%
@@ -78,7 +164,7 @@ print(tibble(
 ))
 
 # --------------------------------------------------------------------------
-# Parada 3. Absorbancia a 280 nm contra Bradford (paso 19 del manual)
+# Parada 4. Absorbancia a 280 nm contra Bradford (paso 19 del manual)
 # --------------------------------------------------------------------------
 # El manual pide analizar las fracciones por absorbancia a 280 nm (a
 # excepcion de los tubos que contienen niquel) y por SDS-PAGE. La A280
@@ -103,21 +189,32 @@ print(datos %>%
             max(abs(concentracion_a280_mg_ml - concentracion_proteina_mg_ml))
         ))
 
+# La recta de la A280 contra el Bradford y su R2: si los dos metodos miden
+# lo mismo, la pendiente es cercana a 1 y el R2 cercano a 1.
+ajuste_a280 <- lm(concentracion_a280_mg_ml ~ concentracion_proteina_mg_ml,
+                  data = datos)
+r2_a280 <- round(summary(ajuste_a280)$r.squared, 4)
+
 grafica_a280 <- ggplot(
   datos,
   aes(x = concentracion_proteina_mg_ml,
       y = concentracion_a280_mg_ml, color = fase)
 ) +
-  geom_abline(slope = 1, intercept = 0, linetype = "dashed") +
-  geom_point(size = 2.5) +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed",
+              color = "grey40") +
+  geom_smooth(method = "lm", se = FALSE, color = paleta[6], linewidth = 1) +
+  geom_point(size = 3) +
+  annotate("text", x = 0.05, y = 0.95,
+           label = paste0("R2 = ", r2_a280), hjust = 0, size = 4.5) +
+  scale_color_manual(values = paleta) +
   labs(
     x = "Concentracion por Bradford (mg/mL)",
     y = "Concentracion por A280 (mg/mL)",
     color = "Fase",
-    title = "IMAC: A280 contra Bradford por fraccion"
+    title = "IMAC: A280 contra Bradford por fraccion",
+    subtitle = "La linea punteada es la identidad; la linea continua es el ajuste"
   ) +
-  theme_classic(base_size = 13) +
-  theme(plot.title = element_text(face = "bold"))
+  tema
 
 print(grafica_a280)
 
@@ -125,7 +222,7 @@ ggsave("07_imac_a280.png", grafica_a280,
        width = 18, height = 12, units = "cm", dpi = 300)
 
 # --------------------------------------------------------------------------
-# Parada 4. Sesion 2: SDS-PAGE de las fracciones
+# Parada 5. Sesion 2: SDS-PAGE de las fracciones
 # --------------------------------------------------------------------------
 # En la sesion 2 las fracciones se analizan por SDS-PAGE. El gel lleva
 # su propio carril de marcador, asi que la recta log10(PM) contra Rf se
@@ -149,22 +246,36 @@ bandas <- gel %>%
 print(bandas %>%
         select(fraccion, distancia_mm, rf, peso_molecular_kda_estimado))
 
+# La ecuacion de la recta de calibracion y su R2, y la linea de referencia
+# de la albumina (66.5 kDa): las bandas de las fracciones de desorcion
+# deben caer sobre la recta cerca de esa linea.
+ecuacion_gel <- paste0(
+  "log10(PM) = ", round(coef(ajuste_gel)[["(Intercept)"]], 2),
+  " - ", round(-coef(ajuste_gel)[["rf"]], 2), " * Rf,  R2 = ",
+  round(summary(ajuste_gel)$r.squared, 3)
+)
 grafica_gel <- ggplot(marcador_gel,
                       aes(x = rf, y = log10(peso_molecular_kda))) +
-  geom_point(size = 2.5) +
-  geom_smooth(method = "lm", se = FALSE, linewidth = 1) +
+  geom_hline(yintercept = log10(66.5), linetype = "dotted",
+             color = paleta[6], linewidth = 1) +
+  annotate("text", x = max(marcador_gel$rf) * 0.95, y = log10(66.5),
+           label = "Albumina 66.5 kDa", hjust = 1, vjust = -0.6,
+           color = paleta[6], size = 4.5) +
+  geom_point(size = 3, color = paleta[1]) +
+  geom_smooth(method = "lm", se = FALSE, linewidth = 1, color = paleta[1]) +
   geom_point(
     data = bandas,
     aes(x = rf, y = log10(peso_molecular_kda_estimado)),
-    color = "red", size = 3
+    color = paleta[6], size = 3.5
   ) +
   labs(
     x = "Rf (distancia / frente)",
     y = "log10(peso molecular, kDa)",
-    title = "IMAC sesion 2: calibracion y bandas de las fracciones (rojo)"
+    title = "IMAC sesion 2: calibracion y bandas de las fracciones",
+    subtitle = ecuacion_gel,
+    caption = "Puntos oscuros: marcador; puntos naranja: bandas de las fracciones"
   ) +
-  theme_classic(base_size = 13) +
-  theme(plot.title = element_text(face = "bold"))
+  tema
 
 print(grafica_gel)
 
@@ -172,27 +283,43 @@ ggsave("07_imac_sds_sesion2.png", grafica_gel,
        width = 18, height = 12, units = "cm", dpi = 300)
 
 # --------------------------------------------------------------------------
-# Parada 5. Grafica: cromatograma IMAC
+# Parada 6. Grafica: cromatograma IMAC
 # --------------------------------------------------------------------------
-# Graficamos el cromatograma: cada barra es una fraccion y su color marca la fase, carga y lavado o desorcion. Aqui se ve donde sale la proteina.
+# Graficamos el cromatograma: cada barra es una fraccion y su color marca la fase, carga y lavado o desorcion. La fraccion del pico de desorcion lleva su etiqueta y el subtitulo trae la masa recuperada en la desorcion y su porcentaje respecto a lo cargado.
+pico <- datos %>%
+  filter(fase == "Desorcion (pH 4.0)") %>%
+  filter(concentracion_proteina_mg_ml ==
+           max(concentracion_proteina_mg_ml))
+subtitulo_cromatograma <- paste0(
+  "Pico de desorcion en la fraccion ", pico$fraccion,
+  "; masa recuperada en la desorcion: ", round(masa_desorcion, 2),
+  " mg (", round(masa_desorcion / masa_cargada_mg * 100, 1),
+  "% de los 6 mg cargados)"
+)
 grafica <- ggplot(
   datos,
   aes(x = fraccion, y = concentracion_proteina_mg_ml, fill = fase)
 ) +
   geom_col(width = 0.8) +
+  geom_text(data = pico,
+            aes(x = fraccion, y = concentracion_proteina_mg_ml,
+                label = paste0("Pico: fraccion ", fraccion)),
+            nudge_y = 0.06, size = 4.5, color = "black",
+            inherit.aes = FALSE) +
+  scale_fill_manual(values = paleta) +
   labs(
     x = "Fraccion (1 min, 0.5 mL cada una)",
     y = "Concentracion de proteina (mg/mL)",
     fill = "Fase",
-    title = "IMAC con Ni(II): cromatograma de albumina"
+    title = "IMAC con Ni(II): cromatograma de albumina",
+    subtitle = subtitulo_cromatograma
   ) +
-  theme_classic(base_size = 13) +
-  theme(plot.title = element_text(face = "bold"))
+  tema
 
 print(grafica)
 
 # --------------------------------------------------------------------------
-# 6. Exportar la grafica
+# 7. Exportar la grafica
 # --------------------------------------------------------------------------
 # Antes de salir de la columna de IMAC guardamos la grafica de la practica.
 ggsave("07_imac.png", grafica,
@@ -201,17 +328,18 @@ ggsave("07_imac.png", grafica,
 # --------------------------------------------------------------------------
 # Interpretacion
 # --------------------------------------------------------------------------
-# Grafica (cromatograma IMAC): el eje x es la fraccion (1 min, 0.5 mL cada una) y el eje y es la concentracion de proteina en mg/mL; el color marca la fase.
+# Grafica (cromatograma IMAC): el eje x es la fraccion (1 min, 0.5 mL cada una) y el eje y es la concentracion de proteina en mg/mL; el color marca la fase y el subtitulo trae la masa recuperada en la desorcion.
 # - En carga y lavado casi no sale proteina: la albumina queda retenida en la columna con niquel a pH 7.0. Esto significa que la histidina de la superficie se une al niquel a pH 7, y por eso lo siguiente es cambiar el buffer para desorberla.
 # - Al cambiar a pH 4.0 aparece el pico de desorcion entre las fracciones 13 y 17, donde sale la mayor parte de la proteina. Esto significa que al protonarse la histidina a pH 4 la union se rompe y la proteina sale en pocas fracciones concentradas, que son las que se juntan.
-# Grafica (A280 contra Bradford): el eje x es la concentracion por Bradford en mg/mL y el eje y es la concentracion por A280 en mg/mL; la linea punteada es la identidad.
+# Grafica (A280 contra Bradford): el eje x es la concentracion por Bradford en mg/mL y el eje y es la concentracion por A280 en mg/mL; la linea punteada es la identidad y la linea continua es el ajuste, con su R2 anotado.
 # - Los puntos caen sobre la identidad: la A280 y el Bradford miden la misma concentracion en cada fraccion. Esto significa que los dos metodos concuerdan y que la A280 sirve para seguir la proteina fraccion por fraccion sin gastar reactivo.
-# Grafica (sesion 2, calibracion y bandas): el eje x es el Rf y el eje y es log10 del peso molecular en kDa; los puntos rojos son las bandas de las fracciones de desorcion.
+# Grafica (sesion 2, calibracion y bandas): el eje x es el Rf y el eje y es log10 del peso molecular en kDa; los puntos naranja son las bandas de las fracciones de desorcion y la linea punteada es la albumina (66.5 kDa).
 # - Las bandas de las fracciones de desorcion caen sobre la recta cerca de 66 kDa, el peso molecular de la albumina, y las fracciones de carga y lavado no muestran banda. Esto significa que lo que salio en la desorcion es la albumina retenida y que en carga y lavado casi no paso proteina.
 
 # --------------------------------------------------------------------------
 # Que aprendimos
 # --------------------------------------------------------------------------
+# - La absorbancia a 595 nm se convierte en concentracion con la curva de Bradford; la dilucion 1:100 deja la lectura dentro de la curva.
 # - La histidina de la superficie se une al niquel a pH 7 y se protona a pH 4, lo que rompe la union y desorbe la proteina.
 # - La masa recuperada es la suma de concentracion por volumen en cada fraccion de la desorcion.
 # - La A280 confirma la cuantificacion por Bradford fraccion por fraccion, y el gel de la sesion 2 confirma que la banda de la desorcion es la albumina.

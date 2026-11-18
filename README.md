@@ -47,8 +47,11 @@ instalar en la computadora o usar R en la nube, sin instalar nada.
    - Positron (gratuito), desde https://positron.posit.co/
 3. Abre RStudio o Positron e instala los paquetes que usan las lecciones:
    `install.packages("tidyverse")`
-4. Descarga este repositorio (o clónalo con git), abre el editor en la
-   carpeta de la lección y ejecuta el script.
+4. Descarga este repositorio (o clónalo con git). Abre el archivo
+   `bioseparaciones.Rproj` para abrir el proyecto en RStudio o Positron,
+   o abre directamente el script de la lección que quieras correr. Cada
+   script encuentra solo su carpeta y sus datos, así que no hay que editar
+   ninguna ruta: basta abrir el script y ejecutarlo.
 
 Las versiones animadas (`*-animado.R`) necesitan además los paquetes
 `gganimate` y `gifski`:
@@ -72,9 +75,19 @@ Las versiones animadas (`*-animado.R`) necesitan además los paquetes
 
 Cada lección es un script de R que lee sus datos de un archivo CSV en la
 misma carpeta, calcula todo a partir de los datos y guarda sus gráficas
-como PNG a 300 dpi con `ggsave()`. Para correr una lección, abre R o
-RStudio en la carpeta de la lección y ejecuta el script. Los paquetes
+como PNG a 300 dpi con `ggsave()`. Para correr una lección, descarga o
+clona la carpeta, abre el proyecto `bioseparaciones.Rproj` (o el script
+directamente) y ejecuta el script. El script resuelve solo la carpeta
+donde está guardado y la pone como carpeta de trabajo, así que no hay que
+editar rutas ni cambiar el directorio de trabajo a mano. Los paquetes
 necesarios son los de `tidyverse`.
+
+Las prácticas que cuantifican proteína (P4, P5, P7 y P8) parten de la
+absorbancia a 595 nm: su CSV trae los estándares de Bradford (0, 2.5, 5,
+10 y 20 µg/mL, por triplicado, los mismos de la práctica 3) y las
+muestras con su absorbancia y su factor de dilución, y el script ajusta
+la curva de calibración y convierte la absorbancia en concentración. La
+práctica 3 es la curva de referencia.
 
 Las prácticas 6, 7 y 8 y la unidad 8 de teoría tienen además una versión
 animada (`*-animado.R`) con `gganimate`: el cromatograma del FPLC, los

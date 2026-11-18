@@ -23,6 +23,52 @@
 library(tidyverse)
 
 # --------------------------------------------------------------------------
+# Carpeta de trabajo: la del propio script
+# --------------------------------------------------------------------------
+# El script resuelve solo la carpeta donde esta guardado y la pone como
+# carpeta de trabajo, asi los archivos de datos se leen por su nombre y la
+# grafica se guarda en la misma carpeta, sin editar rutas.
+# Primero prueba la ruta del documento activo en RStudio o Positron, luego
+# la ruta del archivo al correr con Rscript o source(), y si nada de eso
+# da una ruta, se queda en la carpeta de trabajo actual.
+ruta_script <- NULL
+if (requireNamespace("rstudioapi", quietly = TRUE) &&
+    rstudioapi::isAvailable()) {
+  ruta_script <- tryCatch(
+    rstudioapi::getActiveDocumentContext()$path,
+    error = function(e) NULL
+  )
+}
+if (is.null(ruta_script) || !nzchar(ruta_script)) {
+  ruta_script <- tryCatch(sys.frame(1)$ofile, error = function(e) NULL)
+}
+# Con Rscript el archivo no deja marco en la pila, asi que su ruta viene
+# en los argumentos de la linea de comandos (--file=...).
+if (is.null(ruta_script) || !nzchar(ruta_script)) {
+  archivo <- grep("--file=", commandArgs(trailingOnly = FALSE), value = TRUE)
+  if (length(archivo) > 0) {
+    ruta_script <- sub("--file=", "", archivo[1])
+  }
+}
+if (!is.null(ruta_script) && nzchar(ruta_script)) {
+  setwd(dirname(normalizePath(ruta_script, mustWork = FALSE)))
+}
+
+# Estilo de graficas: tema claro y legible, paleta apta para daltonicos
+# (Okabe-Ito) y tamano de fuente base mayor, para que las graficas se
+# lean bien en el reporte y en la presentacion.
+paleta <- c("#0072B2", "#E69F00", "#009E73", "#CC79A7", "#56B4E9", "#D55E00")
+tema <- theme_bw(base_size = 14) +
+  theme(
+    plot.title = element_text(face = "bold", size = 15),
+    plot.subtitle = element_text(size = 12),
+    axis.title = element_text(face = "bold"),
+    legend.position = "bottom",
+    legend.title = element_text(face = "bold"),
+    panel.grid.minor = element_blank()
+  )
+
+# --------------------------------------------------------------------------
 # Parada 1. Difusividad molecular (Stokes-Einstein)
 # --------------------------------------------------------------------------
 # Llegamos a la mesa de caracterizacion y lo primero que medimos es el radio hidrodinamico de cada proteina. Con ese radio calculamos que tan rapido difunde cada una: esa velocidad es la que despues limita que tan rapido una proteina llega a una superficie o atraviesa una membrana.
@@ -62,15 +108,15 @@ print(puntos_cruce)
 # --------------------------------------------------------------------------
 # Ahora graficamos lo medido en la primera parada para ver el patron de un vistazo: cada punto es una proteina y su nombre esta escrito junto a el.
 grafica_d <- ggplot(datos_d, aes(x = radio_nm, y = difusividad_um2_s)) +
-  geom_point(size = 3) +
+  geom_point(size = 3, color = paleta[1]) +
   geom_text(aes(label = proteina), vjust = -1, size = 3.5) +
   labs(
     x = "Radio hidrodinamico (nm)",
     y = "Difusividad (um2/s)",
-    title = "Difusividad molecular (Stokes-Einstein, 25 C)"
+    title = "Difusividad molecular (Stokes-Einstein, 25 C)",
+    subtitle = "D = kB * T / (6 * pi * eta * r)"
   ) +
-  theme_classic(base_size = 13) +
-  theme(plot.title = element_text(face = "bold"))
+  tema
 
 print(grafica_d)
 
@@ -79,17 +125,25 @@ print(grafica_d)
 # --------------------------------------------------------------------------
 # Seguimos a la grafica de la segunda parada: la curva de carga contra pH, con la linea de carga cero y el pI 4.7 marcados. Aqui se lee directo el punto isoelectrico.
 grafica_ph <- ggplot(datos_ph, aes(x = ph, y = carga_neta)) +
-  geom_hline(yintercept = 0, linetype = "dashed") +
-  geom_vline(xintercept = 4.7, linetype = "dashed") +
-  geom_line(linewidth = 1) +
-  geom_point(size = 2.5) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "grey40") +
+  geom_vline(xintercept = 4.7, linetype = "dashed", color = "grey40") +
+  geom_line(linewidth = 1, color = paleta[1]) +
+  geom_point(size = 3, color = paleta[1]) +
+  geom_point(aes(x = 4.7, y = 0), color = paleta[6], size = 4) +
+  annotate("text", x = 4.7, y = max(datos_ph$carga_neta) * 0.9,
+           label = "pI 4.7", hjust = -0.3, size = 4.5, color = paleta[6]) +
+  annotate("text", x = min(datos_ph$ph) + 0.3,
+           y = max(datos_ph$carga_neta) * 0.9,
+           label = "Carga positiva", hjust = 0, size = 4.5) +
+  annotate("text", x = max(datos_ph$ph) - 0.3,
+           y = min(datos_ph$carga_neta) * 0.9,
+           label = "Carga negativa", hjust = 1, size = 4.5) +
   labs(
     x = "pH",
     y = "Carga neta (unidades de carga)",
     title = "Carga neta de la albumina contra pH (pI = 4.7)"
   ) +
-  theme_classic(base_size = 13) +
-  theme(plot.title = element_text(face = "bold"))
+  tema
 
 print(grafica_ph)
 

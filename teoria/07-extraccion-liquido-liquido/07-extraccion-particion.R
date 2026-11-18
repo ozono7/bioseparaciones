@@ -23,6 +23,52 @@
 library(tidyverse)
 
 # --------------------------------------------------------------------------
+# Carpeta de trabajo: la del propio script
+# --------------------------------------------------------------------------
+# El script resuelve solo la carpeta donde esta guardado y la pone como
+# carpeta de trabajo, asi los archivos de datos se leen por su nombre y la
+# grafica se guarda en la misma carpeta, sin editar rutas.
+# Primero prueba la ruta del documento activo en RStudio o Positron, luego
+# la ruta del archivo al correr con Rscript o source(), y si nada de eso
+# da una ruta, se queda en la carpeta de trabajo actual.
+ruta_script <- NULL
+if (requireNamespace("rstudioapi", quietly = TRUE) &&
+    rstudioapi::isAvailable()) {
+  ruta_script <- tryCatch(
+    rstudioapi::getActiveDocumentContext()$path,
+    error = function(e) NULL
+  )
+}
+if (is.null(ruta_script) || !nzchar(ruta_script)) {
+  ruta_script <- tryCatch(sys.frame(1)$ofile, error = function(e) NULL)
+}
+# Con Rscript el archivo no deja marco en la pila, asi que su ruta viene
+# en los argumentos de la linea de comandos (--file=...).
+if (is.null(ruta_script) || !nzchar(ruta_script)) {
+  archivo <- grep("--file=", commandArgs(trailingOnly = FALSE), value = TRUE)
+  if (length(archivo) > 0) {
+    ruta_script <- sub("--file=", "", archivo[1])
+  }
+}
+if (!is.null(ruta_script) && nzchar(ruta_script)) {
+  setwd(dirname(normalizePath(ruta_script, mustWork = FALSE)))
+}
+
+# Estilo de graficas: tema claro y legible, paleta apta para daltonicos
+# (Okabe-Ito) y tamano de fuente base mayor, para que las graficas se
+# lean bien en el reporte y en la presentacion.
+paleta <- c("#0072B2", "#E69F00", "#009E73", "#CC79A7", "#56B4E9", "#D55E00")
+tema <- theme_bw(base_size = 14) +
+  theme(
+    plot.title = element_text(face = "bold", size = 15),
+    plot.subtitle = element_text(size = 12),
+    axis.title = element_text(face = "bold"),
+    legend.position = "bottom",
+    legend.title = element_text(face = "bold"),
+    panel.grid.minor = element_blank()
+  )
+
+# --------------------------------------------------------------------------
 # Parada 1. Leer los datos y calcular fraccion neutra y eficiencia
 # --------------------------------------------------------------------------
 # Estamos frente al extractor. Para cada pH calculamos que fraccion del soluto esta neutra, cuanto vale el Kd del modelo y que eficiencia da una etapa con volumenes iguales: esa eficiencia es la que decide si una etapa basta o hacen falta mas.
@@ -52,39 +98,50 @@ print(tibble(ph_hasta_el_cual_E_mayor_50 = ph_50))
 # --------------------------------------------------------------------------
 # Parada 2. Grafica 1: Kd contra pH (medido y modelo)
 # --------------------------------------------------------------------------
-# Graficamos el Kd contra el pH en escala logaritmica: los puntos son lo medido y la linea punteada es el modelo con pKa 4.5.
+# Graficamos el Kd contra el pH en escala logaritmica: los puntos son lo medido y la linea punteada es el modelo con pKa 4.5; la linea vertical marca el pKa y la horizontal el Kd = 1.
 grafica_kd <- ggplot(datos, aes(x = ph, y = kd_medido)) +
-  geom_line(aes(y = kd_modelo), linetype = "dashed", linewidth = 1) +
-  geom_point(size = 2.5) +
+  geom_vline(xintercept = pka, linetype = "dotted", color = paleta[6],
+             linewidth = 1) +
+  annotate("text", x = pka, y = max(datos$kd_medido) * 0.8,
+           label = "pKa 4.5", hjust = -0.2, size = 4.5, color = paleta[6]) +
+  geom_hline(yintercept = 1, linetype = "dotted", color = "grey40") +
+  annotate("text", x = min(datos$ph) + 0.2, y = 1.3,
+           label = "Kd = 1", hjust = 0, size = 4.5) +
+  geom_line(aes(y = kd_modelo), linetype = "dashed", linewidth = 1,
+            color = paleta[1]) +
+  geom_point(size = 3, color = paleta[1]) +
   scale_y_log10() +
   labs(
     x = "pH de la fase acuosa",
     y = "Coeficiente de distribucion, Kd (escala log)",
     title = "Coeficiente de distribucion contra pH (pKa 4.5)"
   ) +
-  theme_classic(base_size = 13) +
-  theme(plot.title = element_text(face = "bold"))
+  tema
 
 print(grafica_kd)
 
 # --------------------------------------------------------------------------
 # Parada 3. Grafica 2: eficiencia de extraccion en una etapa contra pH
 # --------------------------------------------------------------------------
-# Seguimos a la segunda grafica: la eficiencia de extraccion en una etapa contra el pH, con la linea del 50% marcada.
+# Seguimos a la segunda grafica: la eficiencia de extraccion en una etapa contra el pH, con la linea del 50% marcada y la vertical en el pH hasta el cual una etapa todavia llega al 50%.
 grafica_e <- ggplot(
   datos,
   aes(x = ph, y = eficiencia_una_etapa)
 ) +
-  geom_hline(yintercept = 0.5, linetype = "dashed") +
-  geom_line(linewidth = 1) +
-  geom_point(size = 2.5) +
+  geom_hline(yintercept = 0.5, linetype = "dashed", color = "grey40") +
+  geom_vline(xintercept = ph_50, linetype = "dotted", color = paleta[6],
+             linewidth = 1) +
+  annotate("text", x = ph_50, y = 0.9,
+           label = paste0("E = 50% hasta pH ", ph_50),
+           hjust = -0.1, size = 4.5, color = paleta[6]) +
+  geom_line(linewidth = 1, color = paleta[1]) +
+  geom_point(size = 3, color = paleta[1]) +
   labs(
     x = "pH de la fase acuosa",
     y = "Eficiencia de extraccion en una etapa",
     title = "Eficiencia de extraccion en una etapa (Vorg = Vaq)"
   ) +
-  theme_classic(base_size = 13) +
-  theme(plot.title = element_text(face = "bold"))
+  tema
 
 print(grafica_e)
 

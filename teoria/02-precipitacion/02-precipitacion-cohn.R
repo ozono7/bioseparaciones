@@ -23,6 +23,52 @@
 library(tidyverse)
 
 # --------------------------------------------------------------------------
+# Carpeta de trabajo: la del propio script
+# --------------------------------------------------------------------------
+# El script resuelve solo la carpeta donde esta guardado y la pone como
+# carpeta de trabajo, asi los archivos de datos se leen por su nombre y la
+# grafica se guarda en la misma carpeta, sin editar rutas.
+# Primero prueba la ruta del documento activo en RStudio o Positron, luego
+# la ruta del archivo al correr con Rscript o source(), y si nada de eso
+# da una ruta, se queda en la carpeta de trabajo actual.
+ruta_script <- NULL
+if (requireNamespace("rstudioapi", quietly = TRUE) &&
+    rstudioapi::isAvailable()) {
+  ruta_script <- tryCatch(
+    rstudioapi::getActiveDocumentContext()$path,
+    error = function(e) NULL
+  )
+}
+if (is.null(ruta_script) || !nzchar(ruta_script)) {
+  ruta_script <- tryCatch(sys.frame(1)$ofile, error = function(e) NULL)
+}
+# Con Rscript el archivo no deja marco en la pila, asi que su ruta viene
+# en los argumentos de la linea de comandos (--file=...).
+if (is.null(ruta_script) || !nzchar(ruta_script)) {
+  archivo <- grep("--file=", commandArgs(trailingOnly = FALSE), value = TRUE)
+  if (length(archivo) > 0) {
+    ruta_script <- sub("--file=", "", archivo[1])
+  }
+}
+if (!is.null(ruta_script) && nzchar(ruta_script)) {
+  setwd(dirname(normalizePath(ruta_script, mustWork = FALSE)))
+}
+
+# Estilo de graficas: tema claro y legible, paleta apta para daltonicos
+# (Okabe-Ito) y tamano de fuente base mayor, para que las graficas se
+# lean bien en el reporte y en la presentacion.
+paleta <- c("#0072B2", "#E69F00", "#009E73", "#CC79A7", "#56B4E9", "#D55E00")
+tema <- theme_bw(base_size = 14) +
+  theme(
+    plot.title = element_text(face = "bold", size = 15),
+    plot.subtitle = element_text(size = 12),
+    axis.title = element_text(face = "bold"),
+    legend.position = "bottom",
+    legend.title = element_text(face = "bold"),
+    panel.grid.minor = element_blank()
+  )
+
+# --------------------------------------------------------------------------
 # Parada 1. Leer los datos y resumir por molaridad
 # --------------------------------------------------------------------------
 # Estamos frente al tanque de precipitacion. Tomamos las muestras del tanque a cada molaridad de sal y resumimos la solubilidad medida con su desviacion estandar: esa tabla es la foto de como la sal va sacando a la albumina de la solucion.
@@ -60,23 +106,34 @@ print(tibble(c_sal_1_mg_ml_M = c_1mg_ml))
 # --------------------------------------------------------------------------
 # Parada 3. Grafica 1: solubilidad contra molaridad de sal
 # --------------------------------------------------------------------------
-# Graficamos lo que pasa dentro del tanque: cada punto es la solubilidad media a una molaridad de sal, con su barra de desviacion estandar.
+# Graficamos lo que pasa dentro del tanque: cada punto es la solubilidad media a una molaridad de sal, con su barra de desviacion estandar; la curva es el ajuste de Cohn y el texto marca la sal a la que la solubilidad cae a 1 mg/mL.
+curva_cohn <- tibble(
+  molaridad_sulfato_M = seq(min(resumen$molaridad_sulfato_M),
+                            max(resumen$molaridad_sulfato_M), length.out = 100)
+) %>%
+  mutate(solubilidad_ajustada = 10^predict(ajuste, newdata = .))
 grafica_s <- ggplot(
   resumen,
   aes(x = molaridad_sulfato_M, y = solubilidad_media)
 ) +
   geom_errorbar(aes(ymin = solubilidad_media - de,
                     ymax = solubilidad_media + de),
-                width = 0.1, linewidth = 0.6) +
-  geom_line(linewidth = 1) +
-  geom_point(size = 2.5) +
+                width = 0.1, linewidth = 0.6, color = paleta[1]) +
+  geom_line(data = curva_cohn,
+            aes(x = molaridad_sulfato_M, y = solubilidad_ajustada),
+            color = paleta[6], linewidth = 1) +
+  geom_point(size = 3, color = paleta[1]) +
+  geom_vline(xintercept = c_1mg_ml, linetype = "dotted", color = paleta[6]) +
+  annotate("text", x = c_1mg_ml, y = max(resumen$solubilidad_media) * 0.9,
+           label = paste0("S = 1 mg/mL a ", round(c_1mg_ml, 2), " M"),
+           hjust = -0.1, size = 4.5, color = paleta[6]) +
   labs(
     x = "Sulfato de amonio (M)",
     y = "Solubilidad de albumina (mg/mL)",
-    title = "Salting-out de albumina con sulfato de amonio"
+    title = "Salting-out de albumina con sulfato de amonio",
+    subtitle = "La curva es el ajuste de Cohn"
   ) +
-  theme_classic(base_size = 13) +
-  theme(plot.title = element_text(face = "bold"))
+  tema
 
 print(grafica_s)
 
@@ -84,19 +141,23 @@ print(grafica_s)
 # Parada 4. Grafica 2: ajuste de Cohn (log10 S contra C)
 # --------------------------------------------------------------------------
 # Seguimos a la segunda grafica: la misma solubilidad en escala logaritmica, donde el ajuste de Cohn se ve como una recta. Si los puntos caen sobre la recta, el modelo describe lo que pasa en el tanque.
+ecuacion_cohn <- paste0(
+  "log10(S) = ", round(beta, 2), " - ", round(ks, 2),
+  " * C,  R2 = ", round(summary(ajuste)$r.squared, 3)
+)
 grafica_cohn <- ggplot(
   resumen,
   aes(x = molaridad_sulfato_M, y = log10(solubilidad_media))
 ) +
-  geom_point(size = 2.5) +
-  geom_smooth(method = "lm", se = FALSE, linewidth = 1) +
+  geom_point(size = 3, color = paleta[1]) +
+  geom_smooth(method = "lm", se = FALSE, linewidth = 1, color = paleta[1]) +
   labs(
     x = "Sulfato de amonio (M)",
     y = "log10(solubilidad, mg/mL)",
-    title = "Ecuacion de Cohn: log10(S) = beta - Ks * C"
+    title = "Ecuacion de Cohn: log10(S) = beta - Ks * C",
+    subtitle = ecuacion_cohn
   ) +
-  theme_classic(base_size = 13) +
-  theme(plot.title = element_text(face = "bold"))
+  tema
 
 print(grafica_cohn)
 

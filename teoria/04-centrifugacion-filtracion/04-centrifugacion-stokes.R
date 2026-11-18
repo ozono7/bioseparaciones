@@ -23,6 +23,52 @@
 library(tidyverse)
 
 # --------------------------------------------------------------------------
+# Carpeta de trabajo: la del propio script
+# --------------------------------------------------------------------------
+# El script resuelve solo la carpeta donde esta guardado y la pone como
+# carpeta de trabajo, asi los archivos de datos se leen por su nombre y la
+# grafica se guarda en la misma carpeta, sin editar rutas.
+# Primero prueba la ruta del documento activo en RStudio o Positron, luego
+# la ruta del archivo al correr con Rscript o source(), y si nada de eso
+# da una ruta, se queda en la carpeta de trabajo actual.
+ruta_script <- NULL
+if (requireNamespace("rstudioapi", quietly = TRUE) &&
+    rstudioapi::isAvailable()) {
+  ruta_script <- tryCatch(
+    rstudioapi::getActiveDocumentContext()$path,
+    error = function(e) NULL
+  )
+}
+if (is.null(ruta_script) || !nzchar(ruta_script)) {
+  ruta_script <- tryCatch(sys.frame(1)$ofile, error = function(e) NULL)
+}
+# Con Rscript el archivo no deja marco en la pila, asi que su ruta viene
+# en los argumentos de la linea de comandos (--file=...).
+if (is.null(ruta_script) || !nzchar(ruta_script)) {
+  archivo <- grep("--file=", commandArgs(trailingOnly = FALSE), value = TRUE)
+  if (length(archivo) > 0) {
+    ruta_script <- sub("--file=", "", archivo[1])
+  }
+}
+if (!is.null(ruta_script) && nzchar(ruta_script)) {
+  setwd(dirname(normalizePath(ruta_script, mustWork = FALSE)))
+}
+
+# Estilo de graficas: tema claro y legible, paleta apta para daltonicos
+# (Okabe-Ito) y tamano de fuente base mayor, para que las graficas se
+# lean bien en el reporte y en la presentacion.
+paleta <- c("#0072B2", "#E69F00", "#009E73", "#CC79A7", "#56B4E9", "#D55E00")
+tema <- theme_bw(base_size = 14) +
+  theme(
+    plot.title = element_text(face = "bold", size = 15),
+    plot.subtitle = element_text(size = 12),
+    axis.title = element_text(face = "bold"),
+    legend.position = "bottom",
+    legend.title = element_text(face = "bold"),
+    panel.grid.minor = element_blank()
+  )
+
+# --------------------------------------------------------------------------
 # Parada 1. Velocidad de sedimentacion (Ley de Stokes)
 # --------------------------------------------------------------------------
 # Estamos frente a la centrifuga con el lisado adentro. Primero calculamos a que velocidad sedimenta cada particula a 1 g: esa velocidad decide en que orden se separan las fracciones cuando el rotor gira.
@@ -75,17 +121,17 @@ grafica_v <- ggplot(
   datos,
   aes(x = diametro_um, y = velocidad_um_s)
 ) +
-  geom_point(size = 3) +
+  geom_point(size = 3, color = paleta[1]) +
   geom_text(aes(label = particula), vjust = -1, size = 3.5) +
   scale_x_log10() +
   scale_y_log10() +
   labs(
     x = "Diametro (um, escala log)",
     y = "Velocidad de sedimentacion (um/s, escala log)",
-    title = "Ley de Stokes: velocidad de sedimentacion a 1 g"
+    title = "Ley de Stokes: velocidad de sedimentacion a 1 g",
+    subtitle = "v = d^2 * (rho_p - rho_f) * g / (18 * eta)"
   ) +
-  theme_classic(base_size = 13) +
-  theme(plot.title = element_text(face = "bold"))
+  tema
 
 print(grafica_v)
 
@@ -94,15 +140,19 @@ print(grafica_v)
 # --------------------------------------------------------------------------
 # Seguimos a la segunda grafica: la RCF contra las rpm del rotor, para ver como crece la fuerza cuando el rotor acelera.
 grafica_rcf <- ggplot(datos_rcf, aes(x = rpm, y = rcf_g)) +
-  geom_line(linewidth = 1) +
-  geom_point(size = 2.5) +
+  geom_line(linewidth = 1, color = paleta[1]) +
+  geom_point(size = 3, color = paleta[1]) +
+  geom_point(aes(x = 10000, y = rcf_10000), color = paleta[6], size = 4) +
+  annotate("text", x = 10000, y = rcf_10000,
+           label = paste0("Levadura: ", round(rcf_10000, 0),
+                          " g a 10000 rpm"),
+           hjust = -0.1, vjust = -0.5, size = 4.5, color = paleta[6]) +
   labs(
     x = "Velocidad del rotor (rpm)",
     y = "Fuerza centrifuga relativa (x g)",
     title = "RCF contra rpm (radio del rotor 10 cm)"
   ) +
-  theme_classic(base_size = 13) +
-  theme(plot.title = element_text(face = "bold"))
+  tema
 
 print(grafica_rcf)
 

@@ -23,6 +23,52 @@
 library(tidyverse)
 
 # --------------------------------------------------------------------------
+# Carpeta de trabajo: la del propio script
+# --------------------------------------------------------------------------
+# El script resuelve solo la carpeta donde esta guardado y la pone como
+# carpeta de trabajo, asi los archivos de datos se leen por su nombre y la
+# grafica se guarda en la misma carpeta, sin editar rutas.
+# Primero prueba la ruta del documento activo en RStudio o Positron, luego
+# la ruta del archivo al correr con Rscript o source(), y si nada de eso
+# da una ruta, se queda en la carpeta de trabajo actual.
+ruta_script <- NULL
+if (requireNamespace("rstudioapi", quietly = TRUE) &&
+    rstudioapi::isAvailable()) {
+  ruta_script <- tryCatch(
+    rstudioapi::getActiveDocumentContext()$path,
+    error = function(e) NULL
+  )
+}
+if (is.null(ruta_script) || !nzchar(ruta_script)) {
+  ruta_script <- tryCatch(sys.frame(1)$ofile, error = function(e) NULL)
+}
+# Con Rscript el archivo no deja marco en la pila, asi que su ruta viene
+# en los argumentos de la linea de comandos (--file=...).
+if (is.null(ruta_script) || !nzchar(ruta_script)) {
+  archivo <- grep("--file=", commandArgs(trailingOnly = FALSE), value = TRUE)
+  if (length(archivo) > 0) {
+    ruta_script <- sub("--file=", "", archivo[1])
+  }
+}
+if (!is.null(ruta_script) && nzchar(ruta_script)) {
+  setwd(dirname(normalizePath(ruta_script, mustWork = FALSE)))
+}
+
+# Estilo de graficas: tema claro y legible, paleta apta para daltonicos
+# (Okabe-Ito) y tamano de fuente base mayor, para que las graficas se
+# lean bien en el reporte y en la presentacion.
+paleta <- c("#0072B2", "#E69F00", "#009E73", "#CC79A7", "#56B4E9", "#D55E00")
+tema <- theme_bw(base_size = 14) +
+  theme(
+    plot.title = element_text(face = "bold", size = 15),
+    plot.subtitle = element_text(size = 12),
+    axis.title = element_text(face = "bold"),
+    legend.position = "bottom",
+    legend.title = element_text(face = "bold"),
+    panel.grid.minor = element_blank()
+  )
+
+# --------------------------------------------------------------------------
 # Protocolo (Manual de Practicas, Practica 6. FPLC, BioLogic LP)
 # --------------------------------------------------------------------------
 # El equipo BioLogic LP tiene: modulo/valvula de mezclado que proporciona dos buffers para la fase movil; detector UV con lampara de mercurio y filtros para 280 nm y 254 nm; detector de conductividad para monitorear gradientes de sales en linea; colector de fracciones controlado por el sistema electronico; y controlador que registra conductividad y UV y controla start/stop, flujo, seleccion de buffer y protocolos.
@@ -83,49 +129,71 @@ print(datos %>%
                   absorbancia_280_media = mean(absorbancia_280),
                   .groups = "drop"))
 
+# Bandas de cada tramo del protocolo (para sombrear las fases en las
+# graficas): el inicio y el fin de cada tramo en volumen acumulado.
+bandas_fase <- datos %>%
+  group_by(tramo, fase) %>%
+  summarise(inicio_ml = min(volumen_ml), fin_ml = max(volumen_ml),
+            .groups = "drop") %>%
+  arrange(inicio_ml)
+
 # --------------------------------------------------------------------------
 # Parada 2. Grafica 1: absorbancia a 280 nm contra volumen
 # --------------------------------------------------------------------------
-# Graficamos la absorbancia a 280 nm contra el volumen acumulado, con cada fase en un color: asi se ve si pasa proteina por el detector en la preparacion.
+# Graficamos la absorbancia a 280 nm contra el volumen acumulado, con cada fase en un color y sombreada en su tramo: asi se ve si pasa proteina por el detector en la preparacion.
 grafica_uv <- ggplot(
   datos,
   aes(x = volumen_ml, y = absorbancia_280, color = fase)
 ) +
+  geom_rect(data = bandas_fase,
+            aes(xmin = inicio_ml, xmax = fin_ml,
+                ymin = -Inf, ymax = Inf, fill = fase),
+            alpha = 0.10, inherit.aes = FALSE) +
   geom_vline(data = limites_fase, aes(xintercept = limite_ml),
              linetype = "dashed", color = "grey40") +
   geom_line(linewidth = 1) +
   geom_point(size = 2) +
+  scale_color_manual(values = paleta) +
+  scale_fill_manual(values = paleta) +
   labs(
     x = "Volumen acumulado (mL)",
     y = "Absorbancia a 280 nm",
     color = "Fase",
-    title = "FPLC: absorbancia a 280 nm durante la preparacion"
+    fill = "Fase",
+    title = "FPLC: absorbancia a 280 nm durante la preparacion",
+    subtitle = "Cada tramo sombreado es una fase; las lineas punteadas marcan los limites"
   ) +
-  theme_classic(base_size = 13) +
-  theme(plot.title = element_text(face = "bold"))
+  tema
 
 print(grafica_uv)
 
 # --------------------------------------------------------------------------
 # Parada 3. Grafica 2: conductividad contra volumen
 # --------------------------------------------------------------------------
-# Seguimos a la segunda grafica: la conductividad contra el volumen acumulado, con cada fase en un color. Aqui se ve cada cambio de solucion del protocolo.
+# Seguimos a la segunda grafica: la conductividad contra el volumen acumulado, con cada fase en un color y sombreada en su tramo. Aqui se ve cada cambio de solucion del protocolo.
 grafica_cond <- ggplot(
   datos,
   aes(x = volumen_ml, y = conductividad_mS_cm, color = fase)
 ) +
+  geom_rect(data = bandas_fase,
+            aes(xmin = inicio_ml, xmax = fin_ml,
+                ymin = -Inf, ymax = Inf, fill = fase),
+            alpha = 0.10, inherit.aes = FALSE) +
   geom_vline(data = limites_fase, aes(xintercept = limite_ml),
              linetype = "dashed", color = "grey40") +
   geom_line(linewidth = 1) +
   geom_point(size = 2) +
+  scale_color_manual(values = paleta) +
+  scale_fill_manual(values = paleta) +
   labs(
     x = "Volumen acumulado (mL)",
     y = "Conductividad (mS/cm)",
     color = "Fase",
-    title = "FPLC: conductividad durante la preparacion"
+    fill = "Fase",
+    title = "FPLC: conductividad durante la preparacion",
+    subtitle = "Cada tramo sombreado es una fase; las lineas punteadas marcan los limites"
   ) +
-  theme_classic(base_size = 13) +
-  theme(plot.title = element_text(face = "bold"))
+  tema
 
 print(grafica_cond)
 
@@ -141,9 +209,9 @@ ggsave("06_fplc_conductividad.png", grafica_cond,
 # --------------------------------------------------------------------------
 # Interpretacion
 # --------------------------------------------------------------------------
-# Grafica 1 (absorbancia a 280 nm contra volumen): el eje x es el volumen acumulado en mL y el eje y es la absorbancia a 280 nm (adimensional).
+# Grafica 1 (absorbancia a 280 nm contra volumen): el eje x es el volumen acumulado en mL y el eje y es la absorbancia a 280 nm (adimensional); cada tramo sombreado es una fase del protocolo.
 # - La absorbancia a 280 nm se mantiene en la linea base: en esta practica todavia no se carga proteina. Esto significa que el detector UV no ve proteina durante la preparacion, y por eso lo siguiente, en la practica de IMAC, es cargar la albumina y ver su pico.
-# Grafica 2 (conductividad contra volumen): el eje x es el volumen acumulado en mL y el eje y es la conductividad en mS/cm.
+# Grafica 2 (conductividad contra volumen): el eje x es el volumen acumulado en mL y el eje y es la conductividad en mS/cm; cada tramo sombreado es una fase del protocolo.
 # - La conductividad marca cada cambio de solucion: sube con la llegada del niquel y del buffer de adsorcion con 500 mM NaCl, y cambia de nuevo con el acido. Esto significa que el detector de conductividad sigue a las sales del buffer, y con el se sabe en que fase del protocolo esta la columna en cada momento.
 # - Las lineas punteadas marcan los limites entre fases (2.5, 4.5, 9.5, 14.5 y 17.5 mL): a la izquierda de cada linea esta la solucion anterior y a la derecha la siguiente. Esto significa que cada tramo del registro corresponde a un paso del protocolo y se lee en orden.
 

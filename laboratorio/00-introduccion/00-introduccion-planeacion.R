@@ -25,6 +25,52 @@
 library(tidyverse)
 
 # --------------------------------------------------------------------------
+# Carpeta de trabajo: la del propio script
+# --------------------------------------------------------------------------
+# El script resuelve solo la carpeta donde esta guardado y la pone como
+# carpeta de trabajo, asi los archivos de datos se leen por su nombre y la
+# grafica se guarda en la misma carpeta, sin editar rutas.
+# Primero prueba la ruta del documento activo en RStudio o Positron, luego
+# la ruta del archivo al correr con Rscript o source(), y si nada de eso
+# da una ruta, se queda en la carpeta de trabajo actual.
+ruta_script <- NULL
+if (requireNamespace("rstudioapi", quietly = TRUE) &&
+    rstudioapi::isAvailable()) {
+  ruta_script <- tryCatch(
+    rstudioapi::getActiveDocumentContext()$path,
+    error = function(e) NULL
+  )
+}
+if (is.null(ruta_script) || !nzchar(ruta_script)) {
+  ruta_script <- tryCatch(sys.frame(1)$ofile, error = function(e) NULL)
+}
+# Con Rscript el archivo no deja marco en la pila, asi que su ruta viene
+# en los argumentos de la linea de comandos (--file=...).
+if (is.null(ruta_script) || !nzchar(ruta_script)) {
+  archivo <- grep("--file=", commandArgs(trailingOnly = FALSE), value = TRUE)
+  if (length(archivo) > 0) {
+    ruta_script <- sub("--file=", "", archivo[1])
+  }
+}
+if (!is.null(ruta_script) && nzchar(ruta_script)) {
+  setwd(dirname(normalizePath(ruta_script, mustWork = FALSE)))
+}
+
+# Estilo de graficas: tema claro y legible, paleta apta para daltonicos
+# (Okabe-Ito) y tamano de fuente base mayor, para que las graficas se
+# lean bien en el reporte y en la presentacion.
+paleta <- c("#0072B2", "#E69F00", "#009E73", "#CC79A7", "#56B4E9", "#D55E00")
+tema <- theme_bw(base_size = 14) +
+  theme(
+    plot.title = element_text(face = "bold", size = 15),
+    plot.subtitle = element_text(size = 12),
+    axis.title = element_text(face = "bold"),
+    legend.position = "bottom",
+    legend.title = element_text(face = "bold"),
+    panel.grid.minor = element_blank()
+  )
+
+# --------------------------------------------------------------------------
 # Reglas del laboratorio (Manual de Practicas)
 # --------------------------------------------------------------------------
 # Antes de empezar las practicas, las reglas de la casa: la teoria y el laboratorio se cursan simultaneamente; cada alumno presenta su manual en las practicas; bata blanca de laboratorio obligatoria, con cubrebocas y guantes cuando se indique; cuestionario pre-laboratorio entregado antes de cada practica; la practica inicia 10 min despues de la hora indicada; limpiar la mesa de trabajo antes y despues de la practica; no fumar ni consumir alimentos o bebidas en el laboratorio. El laboratorio se acredita con al menos 75% de las practicas aprobadas.
@@ -60,31 +106,57 @@ print(tibble(suma_reporte = sum(reporte$porcentaje)))
 # --------------------------------------------------------------------------
 # Parada 2. Grafica: peso de cada componente de la evaluacion
 # --------------------------------------------------------------------------
-# Graficamos el peso de cada componente de la evaluacion para ver de un vistazo que parte pesa mas en la calificacion.
+# Graficamos el peso de cada componente de la evaluacion para ver de un vistazo que parte pesa mas en la calificacion; cada barra lleva su color y su valor anotado, y el subtitulo recuerda que el reporte se divide en cuestionario 5%, resultados 15% y conclusiones 20%.
 grafica <- ggplot(
   evaluacion,
-  aes(x = reorder(componente, porcentaje), y = porcentaje)
+  aes(x = reorder(componente, porcentaje), y = porcentaje, fill = componente)
 ) +
   geom_col(width = 0.6) +
   geom_text(aes(label = paste0(porcentaje, "%")),
             hjust = -0.2, size = 4.5) +
   coord_flip() +
   ylim(0, 50) +
+  scale_fill_manual(values = paleta) +
   labs(
     x = "Componente",
     y = "Peso en la calificacion (%)",
-    title = "Evaluacion del laboratorio de Bioseparacion"
+    title = "Evaluacion del laboratorio de Bioseparacion",
+    subtitle = "La ponderacion suma 100; el reporte (40%) se divide en cuestionario 5%, resultados 15% y conclusiones 20%"
   ) +
-  theme_classic(base_size = 13) +
-  theme(plot.title = element_text(face = "bold"))
+  tema +
+  theme(legend.position = "none")
 
 print(grafica)
 
+# Segunda grafica: el desglose del reporte (40% de la calificacion) en
+# cuestionario 5%, resultados 15% y conclusiones 20%.
+grafica_reporte <- ggplot(
+  reporte,
+  aes(x = reorder(parte, porcentaje), y = porcentaje, fill = parte)
+) +
+  geom_col(width = 0.6) +
+  geom_text(aes(label = paste0(porcentaje, "%")),
+            hjust = -0.2, size = 4.5) +
+  coord_flip() +
+  ylim(0, 25) +
+  scale_fill_manual(values = paleta[3:5]) +
+  labs(
+    x = "Parte del reporte",
+    y = "Peso en la calificacion (%)",
+    title = "Desglose del reporte (40% de la calificacion)"
+  ) +
+  tema +
+  theme(legend.position = "none")
+
+print(grafica_reporte)
+
 # --------------------------------------------------------------------------
-# 3. Exportar la grafica
+# 3. Exportar las graficas
 # --------------------------------------------------------------------------
-# Antes de salir de la entrada guardamos la grafica de la practica.
+# Antes de salir de la entrada guardamos las graficas de la practica.
 ggsave("00_evaluacion.png", grafica,
+       width = 20, height = 12, units = "cm", dpi = 300)
+ggsave("00_reporte.png", grafica_reporte,
        width = 20, height = 12, units = "cm", dpi = 300)
 
 # --------------------------------------------------------------------------
@@ -93,6 +165,8 @@ ggsave("00_evaluacion.png", grafica,
 # Grafica (peso de cada componente de la evaluacion): el eje x es el peso en la calificacion en % y el eje y es el componente de la evaluacion.
 # - La ponderacion suma 100: pre-laboratorio 20%, desarrollo 40% y reporte 40%. Esto significa que el trabajo en la mesa y el reporte pesan lo mismo y juntos hacen el 80%, y por eso lo siguiente en cada practica es trabajar ordenado y reportar con calculos y conclusiones.
 # - Cuatro practicas ocupan dos sesiones: acetona, FPLC, IMAC e intercambio ionico. Esto significa que esas practicas necesitan mas tiempo porque el procedimiento no cabe en una sola sesion, y por eso el calendario les da dos semanas.
+# Grafica (desglose del reporte): el eje x es el peso en la calificacion en % y el eje y es la parte del reporte.
+# - El reporte (40%) se divide en cuestionario 5%, resultados 15% y conclusiones 20%: las conclusiones pesan mas que los resultados. Esto significa que en el reporte lo que mas cuenta es interpretar los resultados y concluir, no solo presentarlos.
 
 # --------------------------------------------------------------------------
 # Que aprendimos

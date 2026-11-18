@@ -23,6 +23,52 @@
 library(tidyverse)
 
 # --------------------------------------------------------------------------
+# Carpeta de trabajo: la del propio script
+# --------------------------------------------------------------------------
+# El script resuelve solo la carpeta donde esta guardado y la pone como
+# carpeta de trabajo, asi los archivos de datos se leen por su nombre y la
+# grafica se guarda en la misma carpeta, sin editar rutas.
+# Primero prueba la ruta del documento activo en RStudio o Positron, luego
+# la ruta del archivo al correr con Rscript o source(), y si nada de eso
+# da una ruta, se queda en la carpeta de trabajo actual.
+ruta_script <- NULL
+if (requireNamespace("rstudioapi", quietly = TRUE) &&
+    rstudioapi::isAvailable()) {
+  ruta_script <- tryCatch(
+    rstudioapi::getActiveDocumentContext()$path,
+    error = function(e) NULL
+  )
+}
+if (is.null(ruta_script) || !nzchar(ruta_script)) {
+  ruta_script <- tryCatch(sys.frame(1)$ofile, error = function(e) NULL)
+}
+# Con Rscript el archivo no deja marco en la pila, asi que su ruta viene
+# en los argumentos de la linea de comandos (--file=...).
+if (is.null(ruta_script) || !nzchar(ruta_script)) {
+  archivo <- grep("--file=", commandArgs(trailingOnly = FALSE), value = TRUE)
+  if (length(archivo) > 0) {
+    ruta_script <- sub("--file=", "", archivo[1])
+  }
+}
+if (!is.null(ruta_script) && nzchar(ruta_script)) {
+  setwd(dirname(normalizePath(ruta_script, mustWork = FALSE)))
+}
+
+# Estilo de graficas: tema claro y legible, paleta apta para daltonicos
+# (Okabe-Ito) y tamano de fuente base mayor, para que las graficas se
+# lean bien en el reporte y en la presentacion.
+paleta <- c("#0072B2", "#E69F00", "#009E73", "#CC79A7", "#56B4E9", "#D55E00")
+tema <- theme_bw(base_size = 14) +
+  theme(
+    plot.title = element_text(face = "bold", size = 15),
+    plot.subtitle = element_text(size = 12),
+    axis.title = element_text(face = "bold"),
+    legend.position = "bottom",
+    legend.title = element_text(face = "bold"),
+    panel.grid.minor = element_blank()
+  )
+
+# --------------------------------------------------------------------------
 # Parada 1. Leer los datos y resumir por metodo y pasadas
 # --------------------------------------------------------------------------
 # Estamos frente al molino de perlas y al homogeneizador. Tomamos muestras despues de cada pasada y resumimos la proteina liberada: la fraccion liberada se calcula contra la proteina total medida de 8.0 mg/mL.
@@ -67,7 +113,7 @@ print(tabla_n90)
 # --------------------------------------------------------------------------
 # Parada 3. Grafica: proteina liberada contra pasadas
 # --------------------------------------------------------------------------
-# Graficamos lo que pasa en los dos equipos: cada curva es un metodo y la linea punteada marca la proteina total de 8.0 mg/mL, el techo que no se puede pasar.
+# Graficamos lo que pasa en los dos equipos: cada curva es un metodo y la linea punteada marca la proteina total de 8.0 mg/mL, el techo que no se puede pasar; la linea de puntos marca el 90% liberado (7.2 mg/mL).
 grafica <- ggplot(
   resumen,
   aes(x = pasadas, y = liberada_media, color = metodo, group = metodo)
@@ -76,16 +122,22 @@ grafica <- ggplot(
                     ymax = liberada_media + de),
                 width = 0.15, linewidth = 0.6) +
   geom_line(linewidth = 1) +
-  geom_point(size = 2.5) +
-  geom_hline(yintercept = proteina_total, linetype = "dashed") +
+  geom_point(size = 3) +
+  geom_hline(yintercept = proteina_total, linetype = "dashed",
+             color = "grey40") +
+  geom_hline(yintercept = 0.9 * proteina_total, linetype = "dotted",
+             color = paleta[6], linewidth = 1) +
+  annotate("text", x = max(resumen$pasadas) * 0.95, y = 0.9 * proteina_total,
+           label = "90% liberado (7.2 mg/mL)", hjust = 1, vjust = -0.6,
+           color = paleta[6], size = 4.5) +
+  scale_color_manual(values = paleta) +
   labs(
     x = "Numero de pasadas",
     y = "Proteina liberada (mg/mL)",
     color = "Metodo",
     title = "Rompimiento celular: proteina liberada por pasadas"
   ) +
-  theme_classic(base_size = 13) +
-  theme(plot.title = element_text(face = "bold"))
+  tema
 
 print(grafica)
 

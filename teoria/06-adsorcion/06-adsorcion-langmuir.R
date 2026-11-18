@@ -23,6 +23,52 @@
 library(tidyverse)
 
 # --------------------------------------------------------------------------
+# Carpeta de trabajo: la del propio script
+# --------------------------------------------------------------------------
+# El script resuelve solo la carpeta donde esta guardado y la pone como
+# carpeta de trabajo, asi los archivos de datos se leen por su nombre y la
+# grafica se guarda en la misma carpeta, sin editar rutas.
+# Primero prueba la ruta del documento activo en RStudio o Positron, luego
+# la ruta del archivo al correr con Rscript o source(), y si nada de eso
+# da una ruta, se queda en la carpeta de trabajo actual.
+ruta_script <- NULL
+if (requireNamespace("rstudioapi", quietly = TRUE) &&
+    rstudioapi::isAvailable()) {
+  ruta_script <- tryCatch(
+    rstudioapi::getActiveDocumentContext()$path,
+    error = function(e) NULL
+  )
+}
+if (is.null(ruta_script) || !nzchar(ruta_script)) {
+  ruta_script <- tryCatch(sys.frame(1)$ofile, error = function(e) NULL)
+}
+# Con Rscript el archivo no deja marco en la pila, asi que su ruta viene
+# en los argumentos de la linea de comandos (--file=...).
+if (is.null(ruta_script) || !nzchar(ruta_script)) {
+  archivo <- grep("--file=", commandArgs(trailingOnly = FALSE), value = TRUE)
+  if (length(archivo) > 0) {
+    ruta_script <- sub("--file=", "", archivo[1])
+  }
+}
+if (!is.null(ruta_script) && nzchar(ruta_script)) {
+  setwd(dirname(normalizePath(ruta_script, mustWork = FALSE)))
+}
+
+# Estilo de graficas: tema claro y legible, paleta apta para daltonicos
+# (Okabe-Ito) y tamano de fuente base mayor, para que las graficas se
+# lean bien en el reporte y en la presentacion.
+paleta <- c("#0072B2", "#E69F00", "#009E73", "#CC79A7", "#56B4E9", "#D55E00")
+tema <- theme_bw(base_size = 14) +
+  theme(
+    plot.title = element_text(face = "bold", size = 15),
+    plot.subtitle = element_text(size = 12),
+    axis.title = element_text(face = "bold"),
+    legend.position = "bottom",
+    legend.title = element_text(face = "bold"),
+    panel.grid.minor = element_blank()
+  )
+
+# --------------------------------------------------------------------------
 # Parada 1. Leer los datos y linealizar la isoterma
 # --------------------------------------------------------------------------
 # Estamos frente a la columna de adsorcion. Medimos cuanta proteina queda retenida por gramo de adsorbente a cada concentracion en equilibrio, y linealizamos la isoterma para sacar qmax y K por regresion.
@@ -57,21 +103,27 @@ curva <- tibble(
 # --------------------------------------------------------------------------
 # Parada 3. Grafica 1: isoterma medida y modelo ajustado
 # --------------------------------------------------------------------------
-# Graficamos la isoterma: los puntos son lo medido en la columna y la linea es el modelo de Langmuir con qmax y K del ajuste.
+# Graficamos la isoterma: los puntos son lo medido en la columna y la linea es el modelo de Langmuir con qmax y K del ajuste; la linea punteada es qmax, la capacidad maxima del adsorbente.
 grafica_iso <- ggplot() +
+  geom_hline(yintercept = qmax, linetype = "dotted", color = paleta[6],
+             linewidth = 1) +
+  annotate("text", x = 1.9, y = qmax,
+           label = paste0("qmax = ", round(qmax, 1), " mg/g"),
+           hjust = 1, vjust = -0.6, size = 4.5, color = paleta[6]) +
   geom_line(data = curva,
             aes(x = concentracion_equilibrio_mg_ml, y = q_modelo),
-            linewidth = 1) +
+            linewidth = 1, color = paleta[1]) +
   geom_point(data = datos,
              aes(x = concentracion_equilibrio_mg_ml, y = q_mg_g),
-             size = 2.5) +
+             size = 3, color = paleta[1]) +
   labs(
     x = "Concentracion en equilibrio, C (mg/mL)",
     y = "Cantidad adsorbida, q (mg/g)",
-    title = "Isoterma de Langmuir (puntos medidos, linea ajustada)"
+    title = "Isoterma de Langmuir (puntos medidos, linea ajustada)",
+    subtitle = paste0("qmax = ", round(qmax, 1), " mg/g,  K = ",
+                      round(k_langmuir, 2), " mL/mg")
   ) +
-  theme_classic(base_size = 13) +
-  theme(plot.title = element_text(face = "bold"))
+  tema
 
 print(grafica_iso)
 
@@ -79,16 +131,21 @@ print(grafica_iso)
 # Parada 4. Grafica 2: forma linealizada 1/q contra 1/C
 # --------------------------------------------------------------------------
 # Seguimos a la segunda grafica: la forma linealizada, donde los mismos datos se ven como una recta y se comprueba que siguen la isoterma de Langmuir.
+ecuacion_langmuir <- paste0(
+  "1/q = ", round(coef(ajuste)[["(Intercept)"]], 3),
+  " + ", round(coef(ajuste)[["inv_c"]], 3), " * (1/C),  R2 = ",
+  round(summary(ajuste)$r.squared, 3)
+)
 grafica_lin <- ggplot(datos, aes(x = inv_c, y = inv_q)) +
-  geom_point(size = 2.5) +
-  geom_smooth(method = "lm", se = FALSE, linewidth = 1) +
+  geom_point(size = 3, color = paleta[1]) +
+  geom_smooth(method = "lm", se = FALSE, linewidth = 1, color = paleta[1]) +
   labs(
     x = "1/C (mL/mg)",
     y = "1/q (g/mg)",
-    title = "Langmuir linealizado: 1/q contra 1/C"
+    title = "Langmuir linealizado: 1/q contra 1/C",
+    subtitle = ecuacion_langmuir
   ) +
-  theme_classic(base_size = 13) +
-  theme(plot.title = element_text(face = "bold"))
+  tema
 
 print(grafica_lin)
 

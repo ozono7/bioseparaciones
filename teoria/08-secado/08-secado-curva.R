@@ -23,6 +23,52 @@
 library(tidyverse)
 
 # --------------------------------------------------------------------------
+# Carpeta de trabajo: la del propio script
+# --------------------------------------------------------------------------
+# El script resuelve solo la carpeta donde esta guardado y la pone como
+# carpeta de trabajo, asi los archivos de datos se leen por su nombre y la
+# grafica se guarda en la misma carpeta, sin editar rutas.
+# Primero prueba la ruta del documento activo en RStudio o Positron, luego
+# la ruta del archivo al correr con Rscript o source(), y si nada de eso
+# da una ruta, se queda en la carpeta de trabajo actual.
+ruta_script <- NULL
+if (requireNamespace("rstudioapi", quietly = TRUE) &&
+    rstudioapi::isAvailable()) {
+  ruta_script <- tryCatch(
+    rstudioapi::getActiveDocumentContext()$path,
+    error = function(e) NULL
+  )
+}
+if (is.null(ruta_script) || !nzchar(ruta_script)) {
+  ruta_script <- tryCatch(sys.frame(1)$ofile, error = function(e) NULL)
+}
+# Con Rscript el archivo no deja marco en la pila, asi que su ruta viene
+# en los argumentos de la linea de comandos (--file=...).
+if (is.null(ruta_script) || !nzchar(ruta_script)) {
+  archivo <- grep("--file=", commandArgs(trailingOnly = FALSE), value = TRUE)
+  if (length(archivo) > 0) {
+    ruta_script <- sub("--file=", "", archivo[1])
+  }
+}
+if (!is.null(ruta_script) && nzchar(ruta_script)) {
+  setwd(dirname(normalizePath(ruta_script, mustWork = FALSE)))
+}
+
+# Estilo de graficas: tema claro y legible, paleta apta para daltonicos
+# (Okabe-Ito) y tamano de fuente base mayor, para que las graficas se
+# lean bien en el reporte y en la presentacion.
+paleta <- c("#0072B2", "#E69F00", "#009E73", "#CC79A7", "#56B4E9", "#D55E00")
+tema <- theme_bw(base_size = 14) +
+  theme(
+    plot.title = element_text(face = "bold", size = 15),
+    plot.subtitle = element_text(size = 12),
+    axis.title = element_text(face = "bold"),
+    legend.position = "bottom",
+    legend.title = element_text(face = "bold"),
+    panel.grid.minor = element_blank()
+  )
+
+# --------------------------------------------------------------------------
 # Parada 1. Leer los datos y calcular la velocidad de secado
 # --------------------------------------------------------------------------
 # Estamos frente al secador con el producto adentro. Medimos la humedad contra el tiempo y calculamos la velocidad de secado por diferencias entre mediciones consecutivas: esa velocidad dice si el secado va en el periodo constante o si ya manda el agua interna.
@@ -67,41 +113,54 @@ print(tibble(
 # --------------------------------------------------------------------------
 # Parada 3. Grafica 1: humedad contra tiempo
 # --------------------------------------------------------------------------
-# Graficamos la curva de secado: la humedad contra el tiempo, con la linea punteada a los 60 min donde termina el periodo de velocidad constante.
+# Graficamos la curva de secado: la humedad contra el tiempo, con la linea punteada a los 60 min donde termina el periodo de velocidad constante y el punto de la humedad critica marcado.
+humedad_critica <- datos %>%
+  filter(tiempo_min == 60) %>%
+  pull(humedad_kg_kg_seco)
 grafica_x <- ggplot(
   datos,
   aes(x = tiempo_min, y = humedad_kg_kg_seco)
 ) +
-  geom_vline(xintercept = 60, linetype = "dashed") +
-  geom_line(linewidth = 1) +
-  geom_point(size = 2.5) +
+  geom_vline(xintercept = 60, linetype = "dashed", color = "grey40") +
+  geom_line(linewidth = 1, color = paleta[1]) +
+  geom_point(size = 3, color = paleta[1]) +
+  geom_point(aes(x = 60, y = humedad_critica), color = paleta[6], size = 4) +
+  annotate("text", x = 60, y = humedad_critica,
+           label = paste0("Humedad critica: ",
+                          round(humedad_critica, 2), " kg/kg"),
+           hjust = -0.1, vjust = -0.5, size = 4.5, color = paleta[6]) +
   labs(
     x = "Tiempo (min)",
     y = "Humedad (kg agua / kg solido seco)",
     title = "Curva de secado (humedad critica a 60 min)"
   ) +
-  theme_classic(base_size = 13) +
-  theme(plot.title = element_text(face = "bold"))
+  tema
 
 print(grafica_x)
 
 # --------------------------------------------------------------------------
 # Parada 4. Grafica 2: velocidad de secado contra humedad
 # --------------------------------------------------------------------------
-# Seguimos a la segunda grafica: la velocidad de secado contra la humedad media, donde se ven los dos periodos del secado.
+# Seguimos a la segunda grafica: la velocidad de secado contra la humedad media, donde se ven los dos periodos del secado; la linea punteada es la velocidad constante del primer periodo.
 grafica_r <- ggplot(
   velocidad,
   aes(x = humedad_media, y = velocidad_kg_kg_min)
 ) +
-  geom_line(linewidth = 1) +
-  geom_point(size = 2.5) +
+  geom_hline(yintercept = velocidad_constante, linetype = "dashed",
+             color = paleta[6], linewidth = 1) +
+  annotate("text", x = max(velocidad$humedad_media) * 0.95,
+           y = velocidad_constante,
+           label = paste0("Velocidad constante: ",
+                          round(velocidad_constante, 4), " kg/kg/min"),
+           hjust = 1, vjust = -0.6, size = 4.5, color = paleta[6]) +
+  geom_line(linewidth = 1, color = paleta[1]) +
+  geom_point(size = 3, color = paleta[1]) +
   labs(
     x = "Humedad media (kg/kg seco)",
     y = "Velocidad de secado (kg/kg/min)",
     title = "Velocidad de secado contra humedad"
   ) +
-  theme_classic(base_size = 13) +
-  theme(plot.title = element_text(face = "bold"))
+  tema
 
 print(grafica_r)
 

@@ -23,6 +23,52 @@
 library(tidyverse)
 
 # --------------------------------------------------------------------------
+# Carpeta de trabajo: la del propio script
+# --------------------------------------------------------------------------
+# El script resuelve solo la carpeta donde esta guardado y la pone como
+# carpeta de trabajo, asi los archivos de datos se leen por su nombre y la
+# grafica se guarda en la misma carpeta, sin editar rutas.
+# Primero prueba la ruta del documento activo en RStudio o Positron, luego
+# la ruta del archivo al correr con Rscript o source(), y si nada de eso
+# da una ruta, se queda en la carpeta de trabajo actual.
+ruta_script <- NULL
+if (requireNamespace("rstudioapi", quietly = TRUE) &&
+    rstudioapi::isAvailable()) {
+  ruta_script <- tryCatch(
+    rstudioapi::getActiveDocumentContext()$path,
+    error = function(e) NULL
+  )
+}
+if (is.null(ruta_script) || !nzchar(ruta_script)) {
+  ruta_script <- tryCatch(sys.frame(1)$ofile, error = function(e) NULL)
+}
+# Con Rscript el archivo no deja marco en la pila, asi que su ruta viene
+# en los argumentos de la linea de comandos (--file=...).
+if (is.null(ruta_script) || !nzchar(ruta_script)) {
+  archivo <- grep("--file=", commandArgs(trailingOnly = FALSE), value = TRUE)
+  if (length(archivo) > 0) {
+    ruta_script <- sub("--file=", "", archivo[1])
+  }
+}
+if (!is.null(ruta_script) && nzchar(ruta_script)) {
+  setwd(dirname(normalizePath(ruta_script, mustWork = FALSE)))
+}
+
+# Estilo de graficas: tema claro y legible, paleta apta para daltonicos
+# (Okabe-Ito) y tamano de fuente base mayor, para que las graficas se
+# lean bien en el reporte y en la presentacion.
+paleta <- c("#0072B2", "#E69F00", "#009E73", "#CC79A7", "#56B4E9", "#D55E00")
+tema <- theme_bw(base_size = 14) +
+  theme(
+    plot.title = element_text(face = "bold", size = 15),
+    plot.subtitle = element_text(size = 12),
+    axis.title = element_text(face = "bold"),
+    legend.position = "bottom",
+    legend.title = element_text(face = "bold"),
+    panel.grid.minor = element_blank()
+  )
+
+# --------------------------------------------------------------------------
 # Protocolo (Manual de Practicas, Practica 2. SDS-PAGE)
 # --------------------------------------------------------------------------
 # Paso 1. Limpiar los vidrios con etanol, dejar secar y montar en los soportes como indique el instructor.
@@ -116,21 +162,34 @@ print(tibble(rf_bsa = rf_bsa, peso_molecular_BSA_kda = pm_bsa))
 # --------------------------------------------------------------------------
 # Parada 5. Grafica: calibracion y BSA
 # --------------------------------------------------------------------------
-# Graficamos la calibracion: los puntos son las bandas del marcador, la linea es la recta ajustada y el punto rojo es la BSA.
+# Graficamos la calibracion: los puntos son las bandas del marcador, la linea es la recta ajustada con su ecuacion y su R2 en el subtitulo, el punto naranja es la BSA con su peso molecular estimado anotado, y la linea punteada es la BSA de referencia (66.5 kDa).
+ecuacion <- paste0(
+  "log10(PM) = ", round(coef(ajuste)[["(Intercept)"]], 2),
+  " - ", round(-coef(ajuste)[["rf"]], 2), " * Rf,  R2 = ",
+  round(summary(ajuste)$r.squared, 3)
+)
 grafica <- ggplot(marcador, aes(x = rf, y = log10(peso_molecular_kda))) +
-  geom_point(size = 2.5) +
-  geom_smooth(method = "lm", se = FALSE, linewidth = 1) +
+  geom_hline(yintercept = log10(66.5), linetype = "dotted",
+             color = paleta[6], linewidth = 1) +
+  annotate("text", x = max(marcador$rf) * 0.95, y = log10(66.5),
+           label = "BSA 66.5 kDa", hjust = 1, vjust = -0.6,
+           color = paleta[6], size = 4.5) +
+  geom_point(size = 3, color = paleta[1]) +
+  geom_smooth(method = "lm", se = FALSE, linewidth = 1, color = paleta[1]) +
   geom_point(
     data = tibble(rf = rf_bsa, y = log10(pm_bsa)),
-    aes(x = rf, y = y), color = "red", size = 3
+    aes(x = rf, y = y), color = paleta[6], size = 3.5
   ) +
+  annotate("text", x = rf_bsa, y = log10(pm_bsa),
+           label = paste0("BSA: ", round(pm_bsa, 1), " kDa"),
+           hjust = -0.1, vjust = -0.5, size = 4.5, color = paleta[6]) +
   labs(
     x = "Rf (distancia / frente)",
     y = "log10(peso molecular, kDa)",
-    title = "SDS-PAGE: calibracion con marcador y BSA (punto rojo)"
+    title = "SDS-PAGE: calibracion con marcador y BSA",
+    subtitle = ecuacion
   ) +
-  theme_classic(base_size = 13) +
-  theme(plot.title = element_text(face = "bold"))
+  tema
 
 print(grafica)
 
@@ -144,7 +203,7 @@ ggsave("02_sds_page.png", grafica,
 # --------------------------------------------------------------------------
 # Interpretacion
 # --------------------------------------------------------------------------
-# Grafica (calibracion con marcador y BSA): el eje x es el Rf (adimensional, distancia entre frente) y el eje y es log10 del peso molecular en kDa.
+# Grafica (calibracion con marcador y BSA): el eje x es el Rf (adimensional, distancia entre frente) y el eje y es log10 del peso molecular en kDa; el punto naranja es la BSA con su peso molecular estimado anotado y la linea punteada es la BSA de referencia (66.5 kDa).
 # - El Rf baja al subir el peso molecular: las proteinas grandes migran menos en el gel. Esto significa que en SDS-PAGE la separacion es por tamano, y por eso lo siguiente es leer el peso molecular de cualquier banda con la recta.
 # - La BSA cae sobre la recta del marcador, cerca de 66 kDa, que es su peso molecular de referencia. Esto significa que la calibracion funciona y que la banda que medimos es la albumina que esperabamos.
 

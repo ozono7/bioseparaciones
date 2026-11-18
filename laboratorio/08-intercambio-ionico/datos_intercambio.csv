@@ -1,31 +1,46 @@
-fraccion,fase,concentracion_proteina_mg_ml,absorbancia_280
-1,Carga y lavado (Tris pH 8.0),0.041,0.028
-2,Carga y lavado (Tris pH 8.0),0.042,0.027
-3,Carga y lavado (Tris pH 8.0),0.04,0.027
-4,Carga y lavado (Tris pH 8.0),0.041,0.024
-5,Carga y lavado (Tris pH 8.0),0.037,0.021
-6,Carga y lavado (Tris pH 8.0),0.04,0.024
-7,Carga y lavado (Tris pH 8.0),0.039,0.027
-8,Carga y lavado (Tris pH 8.0),0.038,0.025
-9,Carga y lavado (Tris pH 8.0),0.039,0.025
-10,Carga y lavado (Tris pH 8.0),0.039,0.027
-11,Desorcion (NaCl 500 mM),0.104,0.069
-12,Desorcion (NaCl 500 mM),0.331,0.219
-13,Desorcion (NaCl 500 mM),0.701,0.470
-14,Desorcion (NaCl 500 mM),0.883,0.591
-15,Desorcion (NaCl 500 mM),0.74,0.492
-16,Desorcion (NaCl 500 mM),0.468,0.313
-17,Desorcion (NaCl 500 mM),0.204,0.136
-18,Desorcion (NaCl 500 mM),0.063,0.045
-19,Desorcion (NaCl 500 mM),0.06,0.042
-20,Desorcion (NaCl 500 mM),0.058,0.037
-21,Desorcion (NaCl 500 mM),0.059,0.043
-22,Desorcion (NaCl 500 mM),0.061,0.038
-23,Desorcion (NaCl 500 mM),0.06,0.039
-24,Desorcion (NaCl 500 mM),0.057,0.040
-25,Desorcion (NaCl 500 mM),0.06,0.037
-26,Desorcion (NaCl 500 mM),0.061,0.041
-27,Desorcion (NaCl 500 mM),0.066,0.040
-28,Desorcion (NaCl 500 mM),0.065,0.045
-29,Desorcion (NaCl 500 mM),0.058,0.041
-30,Desorcion (NaCl 500 mM),0.059,0.040
+tipo,fraccion,fase,replica,concentracion_ug_ml,absorbancia_595,absorbancia_280,factor_dilucion
+estandar,NA,NA,1,0,0.045,NA,NA
+estandar,NA,NA,2,0,0.046,NA,NA
+estandar,NA,NA,3,0,0.045,NA,NA
+estandar,NA,NA,1,2.5,0.124,NA,NA
+estandar,NA,NA,2,2.5,0.126,NA,NA
+estandar,NA,NA,3,2.5,0.123,NA,NA
+estandar,NA,NA,1,5,0.203,NA,NA
+estandar,NA,NA,2,5,0.199,NA,NA
+estandar,NA,NA,3,5,0.2,NA,NA
+estandar,NA,NA,1,10,0.347,NA,NA
+estandar,NA,NA,2,10,0.342,NA,NA
+estandar,NA,NA,3,10,0.353,NA,NA
+estandar,NA,NA,1,20,0.619,NA,NA
+estandar,NA,NA,2,20,0.625,NA,NA
+estandar,NA,NA,3,20,0.631,NA,NA
+muestra,1,Carga y lavado (Tris pH 8.0),1,NA,0.0638,0.028,100
+muestra,2,Carga y lavado (Tris pH 8.0),1,NA,0.0641,0.027,100
+muestra,3,Carga y lavado (Tris pH 8.0),1,NA,0.0636,0.027,100
+muestra,4,Carga y lavado (Tris pH 8.0),1,NA,0.0638,0.024,100
+muestra,5,Carga y lavado (Tris pH 8.0),1,NA,0.0627,0.021,100
+muestra,6,Carga y lavado (Tris pH 8.0),1,NA,0.0636,0.024,100
+muestra,7,Carga y lavado (Tris pH 8.0),1,NA,0.0633,0.027,100
+muestra,8,Carga y lavado (Tris pH 8.0),1,NA,0.063,0.025,100
+muestra,9,Carga y lavado (Tris pH 8.0),1,NA,0.0633,0.025,100
+muestra,10,Carga y lavado (Tris pH 8.0),1,NA,0.0633,0.027,100
+muestra,11,Desorcion (NaCl 500 mM),1,NA,0.082,0.069,100
+muestra,12,Desorcion (NaCl 500 mM),1,NA,0.1476,0.219,100
+muestra,13,Desorcion (NaCl 500 mM),1,NA,0.2544,0.47,100
+muestra,14,Desorcion (NaCl 500 mM),1,NA,0.3069,0.591,100
+muestra,15,Desorcion (NaCl 500 mM),1,NA,0.2656,0.492,100
+muestra,16,Desorcion (NaCl 500 mM),1,NA,0.1871,0.313,100
+muestra,17,Desorcion (NaCl 500 mM),1,NA,0.1109,0.136,100
+muestra,18,Desorcion (NaCl 500 mM),1,NA,0.0702,0.045,100
+muestra,19,Desorcion (NaCl 500 mM),1,NA,0.0693,0.042,100
+muestra,20,Desorcion (NaCl 500 mM),1,NA,0.0688,0.037,100
+muestra,21,Desorcion (NaCl 500 mM),1,NA,0.069,0.043,100
+muestra,22,Desorcion (NaCl 500 mM),1,NA,0.0696,0.038,100
+muestra,23,Desorcion (NaCl 500 mM),1,NA,0.0693,0.039,100
+muestra,24,Desorcion (NaCl 500 mM),1,NA,0.0685,0.04,100
+muestra,25,Desorcion (NaCl 500 mM),1,NA,0.0693,0.037,100
+muestra,26,Desorcion (NaCl 500 mM),1,NA,0.0696,0.041,100
+muestra,27,Desorcion (NaCl 500 mM),1,NA,0.0711,0.04,100
+muestra,28,Desorcion (NaCl 500 mM),1,NA,0.0708,0.045,100
+muestra,29,Desorcion (NaCl 500 mM),1,NA,0.0688,0.041,100
+muestra,30,Desorcion (NaCl 500 mM),1,NA,0.069,0.04,100

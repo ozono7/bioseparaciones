@@ -23,6 +23,52 @@
 library(tidyverse)
 
 # --------------------------------------------------------------------------
+# Carpeta de trabajo: la del propio script
+# --------------------------------------------------------------------------
+# El script resuelve solo la carpeta donde esta guardado y la pone como
+# carpeta de trabajo, asi los archivos de datos se leen por su nombre y la
+# grafica se guarda en la misma carpeta, sin editar rutas.
+# Primero prueba la ruta del documento activo en RStudio o Positron, luego
+# la ruta del archivo al correr con Rscript o source(), y si nada de eso
+# da una ruta, se queda en la carpeta de trabajo actual.
+ruta_script <- NULL
+if (requireNamespace("rstudioapi", quietly = TRUE) &&
+    rstudioapi::isAvailable()) {
+  ruta_script <- tryCatch(
+    rstudioapi::getActiveDocumentContext()$path,
+    error = function(e) NULL
+  )
+}
+if (is.null(ruta_script) || !nzchar(ruta_script)) {
+  ruta_script <- tryCatch(sys.frame(1)$ofile, error = function(e) NULL)
+}
+# Con Rscript el archivo no deja marco en la pila, asi que su ruta viene
+# en los argumentos de la linea de comandos (--file=...).
+if (is.null(ruta_script) || !nzchar(ruta_script)) {
+  archivo <- grep("--file=", commandArgs(trailingOnly = FALSE), value = TRUE)
+  if (length(archivo) > 0) {
+    ruta_script <- sub("--file=", "", archivo[1])
+  }
+}
+if (!is.null(ruta_script) && nzchar(ruta_script)) {
+  setwd(dirname(normalizePath(ruta_script, mustWork = FALSE)))
+}
+
+# Estilo de graficas: tema claro y legible, paleta apta para daltonicos
+# (Okabe-Ito) y tamano de fuente base mayor, para que las graficas se
+# lean bien en el reporte y en la presentacion.
+paleta <- c("#0072B2", "#E69F00", "#009E73", "#CC79A7", "#56B4E9", "#D55E00")
+tema <- theme_bw(base_size = 14) +
+  theme(
+    plot.title = element_text(face = "bold", size = 15),
+    plot.subtitle = element_text(size = 12),
+    axis.title = element_text(face = "bold"),
+    legend.position = "bottom",
+    legend.title = element_text(face = "bold"),
+    panel.grid.minor = element_blank()
+  )
+
+# --------------------------------------------------------------------------
 # Protocolo (Manual de Practicas, Practica 1. Soluciones y pH)
 # --------------------------------------------------------------------------
 # En esta practica el trabajo es preparar soluciones, ajustar el pH y filtrar, con lo que se va a usar en las practicas que siguen. Las soluciones las indica el instructor (las soluciones para SDS-PAGE y el buffer de fosfatos).
@@ -81,23 +127,34 @@ print(datos_am)
 # --------------------------------------------------------------------------
 # Parada 3. Grafica: relacion base/acido contra pH
 # --------------------------------------------------------------------------
-# Graficamos la relacion base/acido contra el pH en escala logaritmica: la linea punteada marca el pKa 4.76, donde la relacion es 1.
+# Graficamos la relacion base/acido contra el pH en escala logaritmica: la zona sombreada es la zona amortiguadora (pKa +- 1), la linea punteada marca el pKa 4.76, donde la relacion es 1, y el texto trae la ecuacion de Henderson-Hasselbalch.
 grafica <- ggplot(
   datos_am,
   aes(x = ph, y = relacion_calculada)
 ) +
-  geom_vline(xintercept = pka, linetype = "dashed") +
-  geom_hline(yintercept = 1, linetype = "dashed") +
-  geom_line(linewidth = 1) +
-  geom_point(size = 2.5) +
+  annotate("rect", xmin = pka - 1, xmax = pka + 1,
+           ymin = -Inf, ymax = Inf, fill = paleta[3], alpha = 0.15) +
+  annotate("text", x = pka, y = 8,
+           label = "Zona amortiguadora\n(pKa +- 1)", size = 4.5,
+           color = paleta[3]) +
+  geom_vline(xintercept = pka, linetype = "dashed", color = "grey40") +
+  geom_hline(yintercept = 1, linetype = "dashed", color = "grey40") +
+  geom_line(linewidth = 1, color = paleta[1]) +
+  geom_point(size = 3, color = paleta[1]) +
+  geom_point(aes(x = pka, y = 1), color = paleta[6], size = 4) +
+  annotate("text", x = pka + 0.3, y = 1.4,
+           label = "pKa 4.76, relacion = 1", hjust = 0, size = 4.5,
+           color = paleta[6]) +
+  annotate("text", x = min(datos_am$ph), y = 0.02,
+           label = "pH = 4.76 + log10([base]/[acido])", hjust = 0,
+           size = 4.5) +
   scale_y_log10() +
   labs(
     x = "pH",
     y = "Relacion [base]/[acido] (escala log)",
     title = "Amortiguador acetato: relacion base/acido contra pH (pKa 4.76)"
   ) +
-  theme_classic(base_size = 13) +
-  theme(plot.title = element_text(face = "bold"))
+  tema
 
 print(grafica)
 
@@ -121,15 +178,21 @@ grafica_pendiente <- ggplot(
   pendiente_nernst,
   aes(x = temperatura_C, y = pendiente_mV_pH)
 ) +
-  geom_line(linewidth = 1) +
-  geom_point(size = 2.5) +
+  geom_vline(xintercept = 25, linetype = "dashed", color = "grey40") +
+  annotate("text", x = 25.5, y = 58.5,
+           label = "25 C, temperatura de trabajo", hjust = 0, size = 4.5) +
+  geom_line(linewidth = 1, color = paleta[1]) +
+  geom_point(size = 3, color = paleta[1]) +
+  geom_text(aes(label = paste0(round(pendiente_mV_pH, 2), " mV/pH")),
+            nudge_y = 0.5, size = 4.5) +
+  annotate("text", x = 20, y = 60.3,
+           label = "Pendiente = 2.303 * R * T / F", hjust = 0, size = 4.5) +
   labs(
     x = "Temperatura (C)",
     y = "Pendiente de Nernst (mV/pH)",
     title = "pH-metro: pendiente de Nernst contra temperatura"
   ) +
-  theme_classic(base_size = 13) +
-  theme(plot.title = element_text(face = "bold"))
+  tema
 
 print(grafica_pendiente)
 
@@ -146,9 +209,9 @@ ggsave("01_amortiguador.png", grafica,
 # --------------------------------------------------------------------------
 # Interpretacion
 # --------------------------------------------------------------------------
-# Grafica (pendiente de Nernst contra temperatura): el eje x es la temperatura en C y el eje y es la pendiente en mV/pH.
+# Grafica (pendiente de Nernst contra temperatura): el eje x es la temperatura en C y el eje y es la pendiente en mV/pH; cada punto trae su valor y la linea punteada es 25 C, la temperatura de trabajo.
 # - La pendiente sube con la temperatura: 58.17 mV/pH a 20 C, 59.16 mV/pH a 25 C y 60.15 mV/pH a 30 C. Esto significa que un pH-metro calibrado a una temperatura mide mal a otra, y por eso se calibra a la temperatura de trabajo.
-# Grafica (relacion base/acido contra pH): el eje x es el pH (adimensional) y el eje y es la relacion [base]/[acido] en escala log (adimensional).
+# Grafica (relacion base/acido contra pH): el eje x es el pH (adimensional) y el eje y es la relacion [base]/[acido] en escala log (adimensional); la zona sombreada es la zona amortiguadora (pKa +- 1) y el punto marcado es el pKa, donde la relacion es 1.
 # - La masa a pesar crece con la concentracion, el volumen y el peso molecular, y sube un poco al corregir por pureza. Esto significa que olvidar la pureza deja la solucion un poco diluida, y por eso lo siguiente en cada practica es pesar con la formula completa.
 # - En pH = pKa la relacion base/acido es 1; por debajo manda el acido y por encima manda la base. Esto significa que el pKa es el centro del amortiguador, y alrededor de el es donde el amortiguador resiste mejor los cambios de pH.
 
